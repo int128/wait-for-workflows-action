@@ -2,6 +2,14 @@ name: wait-for-workflows-action
 description: Wait for workflow runs
 
 inputs:
+  initial-delay-seconds:
+    description: Initial delay in seconds
+    required: true
+    default: '10'
+  period-seconds:
+    description: Polling period in seconds
+    required: true
+    default: '15'
   sha:
     description: Commit SHA to wait for
     required: true
