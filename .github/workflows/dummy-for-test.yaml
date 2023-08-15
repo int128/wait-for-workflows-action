@@ -1,4 +1,4 @@
-name: dummy-for-wait
+name: dummy-for-test
 
 on:
   pull_request:
