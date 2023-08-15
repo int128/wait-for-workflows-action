@@ -2,16 +2,10 @@ name: dummy-for-test
 
 on:
   pull_request:
-    paths:
-      - src/**
-      - tests/**
-      - '*.json'
-      - action.yaml
-      - .github/workflows/ts.yaml
 
 jobs:
   sleep:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 1
     steps:
       - run: sleep 30

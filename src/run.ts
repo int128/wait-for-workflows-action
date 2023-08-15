@@ -48,7 +48,7 @@ export const run = async (inputs: Inputs): Promise<void> => {
       throw new Error(`Failed workflows: ${failedWorkflowNames.join(', ')}`)
     }
 
-    core.info(`Waiting for period ${inputs.initialDelaySeconds}s`)
+    core.info(`Waiting for period ${inputs.periodSeconds}s`)
     await sleep(inputs.periodSeconds * 1000)
   }
 }
