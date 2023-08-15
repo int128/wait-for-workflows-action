@@ -1,0 +1,11 @@
+name: dummy-for-wait
+
+on:
+  pull_request:
+
+jobs:
+  sleep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - run: sleep 45
