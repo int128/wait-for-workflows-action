@@ -7,7 +7,7 @@ type Summary = {
   workflowRuns: WorkflowRun[]
 }
 
-type State = 'Pending' | 'Succeeded' | 'Failed'
+type State = StatusState.Pending | StatusState.Success | StatusState.Failure
 
 type WorkflowRun = {
   status: CheckStatusState
@@ -49,13 +49,18 @@ export const summarize = (checks: ActionsChecksQuery, excludeWorkflowNames: stri
 
 const calculateState = (statusCheckRollupState: StatusState, workflowRuns: WorkflowRun[]): State => {
   if (statusCheckRollupState === StatusState.Failure) {
-    return 'Failed'
+    // workflowRuns may be incomplete if the rollup status is failure
+    return StatusState.Failure
   }
+
   if (workflowRuns.some((run) => run.status !== CheckStatusState.Completed)) {
-    return 'Pending'
+    return StatusState.Pending
   }
   if (workflowRuns.some((run) => run.conclusion === CheckConclusionState.Failure)) {
-    return 'Failed'
+    return StatusState.Failure
   }
-  return 'Succeeded'
+  return StatusState.Success
 }
+
+export const filterFailedWorkflowRuns = (workflowRuns: WorkflowRun[]): WorkflowRun[] =>
+  workflowRuns.filter((run) => run.conclusion === CheckConclusionState.Failure)

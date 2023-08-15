@@ -1,7 +1,11 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import * as actionsChecks from './queries/actionsChecks'
-import { summarize } from './checks'
+import { filterFailedWorkflowRuns, summarize } from './checks'
+import { StatusState } from './generated/graphql-types'
+
+// https://api.github.com/apps/github-actions
+const GITHUB_ACTIONS_APP_ID = 15368
 
 type Inputs = {
   initialDelaySeconds: number
@@ -26,14 +30,22 @@ export const run = async (inputs: Inputs): Promise<void> => {
       owner: github.context.repo.owner,
       name: github.context.repo.repo,
       oid: inputs.sha,
-      appId: 15368, // github-actions
+      appId: GITHUB_ACTIONS_APP_ID,
     })
 
     const summary = summarize(checks, excludeWorkflowNames)
-    core.info(JSON.stringify(summary))
+    core.startGroup(`State: ${summary.state}`)
+    for (const run of summary.workflowRuns) {
+      core.info(`${run.status}: ${run.conclusion}: ${run.workflowName} (${run.event})`)
+    }
+    core.endGroup()
 
-    if (summary.state === 'Succeeded') {
-      break
+    if (summary.state === StatusState.Success) {
+      return
+    }
+    if (summary.state === StatusState.Failure) {
+      const failedWorkflowNames = filterFailedWorkflowRuns(summary.workflowRuns).map((run) => run.workflowName)
+      throw new Error(`Failed workflows: ${failedWorkflowNames.join(', ')}`)
     }
 
     core.info(`Waiting for period ${inputs.initialDelaySeconds}s`)
