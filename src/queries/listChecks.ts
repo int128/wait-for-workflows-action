@@ -50,7 +50,7 @@ export const paginate = async (
   listChecks: (v: ListChecksQueryVariables) => Promise<ListChecksQuery>,
   v: ListChecksQueryVariables,
 ): Promise<ListChecksQuery> => {
-  core.startGroup(`Query actionsChecks(${JSON.stringify(v)})`)
+  core.startGroup(`ListChecksQuery(${JSON.stringify(v)})`)
   const checks = await listChecks(v)
   core.debug(JSON.stringify(checks, undefined, 2))
   core.endGroup()
