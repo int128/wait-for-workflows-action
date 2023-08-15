@@ -36,8 +36,8 @@ A pull request status looks like:
 
 This action waits for the statuses of workflow runs at the current commit SHA.
 
-- If any workflow run is not completed, poll the status.
 - If any workflow run is failed, exit with an error.
+- If any workflow run is not yet completed, poll the statuses.
 - Otherwise, exit successfully.
 
 ### Inputs
