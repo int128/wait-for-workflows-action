@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import * as actionsChecks from './queries/actionsChecks'
+import * as listChecks from './queries/listChecks'
 import { filterFailedWorkflowRuns, summarize } from './checks'
 import { StatusState } from './generated/graphql-types'
 
@@ -26,7 +26,7 @@ export const run = async (inputs: Inputs): Promise<void> => {
   await sleep(inputs.initialDelaySeconds * 1000)
 
   for (;;) {
-    const checks = await actionsChecks.paginate(actionsChecks.withOctokit(octokit), {
+    const checks = await listChecks.paginate(listChecks.withOctokit(octokit), {
       owner: github.context.repo.owner,
       name: github.context.repo.repo,
       oid: inputs.sha,

@@ -1,5 +1,5 @@
 import assert from 'assert'
-import { ActionsChecksQuery } from './generated/graphql'
+import { ListChecksQuery } from './generated/graphql'
 import { CheckConclusionState, CheckStatusState, StatusState } from './generated/graphql-types'
 
 export type Summary = {
@@ -16,7 +16,7 @@ type WorkflowRun = {
   workflowName: string
 }
 
-export const summarize = (checks: ActionsChecksQuery, excludeWorkflowNames: string[]): Summary => {
+export const summarize = (checks: ListChecksQuery, excludeWorkflowNames: string[]): Summary => {
   assert(checks.repository != null)
   assert(checks.repository.object != null)
   assert(checks.repository.object.__typename === 'Commit')
