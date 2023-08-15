@@ -27,8 +27,8 @@ const query = /* GraphQL */ `
             nodes {
               workflowRun {
                 event
-                file {
-                  path
+                workflow {
+                  name
                 }
               }
               status
@@ -59,6 +59,7 @@ export const paginate = async (
   assert(checks.repository.object != null)
   assert(checks.repository.object.__typename === 'Commit')
 
+  // Immediately return if the rollup status is failure
   assert(checks.repository.object.statusCheckRollup != null)
   if (checks.repository.object.statusCheckRollup.state === StatusState.Failure) {
     return checks

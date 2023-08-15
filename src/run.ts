@@ -11,7 +11,11 @@ type Inputs = {
 export const run = async (inputs: Inputs): Promise<void> => {
   const octokit = github.getOctokit(inputs.token)
 
-  for (let i = 0; i < 10; i++) {
+  // exclude self to prevent an infinite loop
+  const selfWorkflowName = github.context.workflow
+  const excludeWorkflowNames = [selfWorkflowName]
+
+  for (;;) {
     const checks = await actionsChecks.paginate(actionsChecks.withOctokit(octokit), {
       owner: github.context.repo.owner,
       name: github.context.repo.repo,
@@ -19,10 +23,12 @@ export const run = async (inputs: Inputs): Promise<void> => {
       appId: 15368, // github-actions
     })
 
-    core.info(JSON.stringify(checks, undefined, 2))
-
-    const summary = summarize(checks)
+    const summary = summarize(checks, excludeWorkflowNames)
     core.info(JSON.stringify(summary))
+
+    if (summary.state === 'Succeeded') {
+      break
+    }
 
     await new Promise((resolve) => setTimeout(resolve, 1000))
   }
