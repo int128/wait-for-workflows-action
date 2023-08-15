@@ -11,7 +11,7 @@ type State = 'Pending' | 'Succeeded' | 'Failed'
 
 type WorkflowRun = {
   status: CheckStatusState
-  conclusion: CheckConclusionState
+  conclusion: CheckConclusionState | null
   event: string
   filepath: string
 }
@@ -31,7 +31,7 @@ export const summarize = (checks: ActionsChecksQuery): Summary => {
   assert(checks.repository.object.checkSuites.nodes != null)
   for (const node of checks.repository.object.checkSuites.nodes) {
     assert(node != null)
-    assert(node.conclusion != null)
+    assert(node.conclusion !== undefined)
     assert(node.workflowRun != null)
     assert(node.workflowRun.file != null)
 
