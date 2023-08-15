@@ -18,14 +18,14 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
-      - uses: actions/setup-node@e33196f7422957bea03ed53f6fbb155025ffc7b8 # v3.7.0
+      - uses: actions/setup-node@bea5baf987ba7aa777a8a0b4ace377a21c45c381 # v3.8.0
         with:
           node-version: 16
           cache: yarn
       - run: yarn
       - run: yarn build
       - run: yarn package
-      - uses: int128/release-typescript-action@035c6899d22569f5440029e3e744b951c01659e5 # v1.22.0
+      - uses: int128/release-typescript-action@a64165f6c50e883d7bafd5c4c66acc7edfd6a4fb # v1.23.0
         with:
           # TODO: change this on the stable release
           major-version: 0
