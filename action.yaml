@@ -1,10 +1,23 @@
-name: typescript-action
-description: Template of TypeScript Action
+name: wait-for-workflows-action
+description: Wait for workflow runs
 
 inputs:
-  name:
-    description: example input
+  initial-delay-seconds:
+    description: Initial delay before polling in seconds
     required: true
+    default: '10'
+  period-seconds:
+    description: Polling period in seconds
+    required: true
+    default: '15'
+  sha:
+    description: Commit SHA to wait for
+    required: true
+    default: ${{ github.event.pull_request.head.sha || github.sha }}
+  token:
+    description: GitHub token
+    required: true
+    default: ${{ github.token }}
 
 runs:
   using: 'node16'
