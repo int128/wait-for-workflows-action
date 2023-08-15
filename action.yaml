@@ -3,7 +3,7 @@ description: Wait for workflow runs
 
 inputs:
   initial-delay-seconds:
-    description: Initial delay in seconds
+    description: Initial delay before polling in seconds
     required: true
     default: '10'
   period-seconds:
