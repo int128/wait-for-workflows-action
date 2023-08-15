@@ -19,7 +19,7 @@ type WorkflowRun = {
 export const summarize = (checks: ListChecksQuery, excludeWorkflowNames: string[]): Summary => {
   assert(checks.repository != null)
   assert(checks.repository.object != null)
-  assert(checks.repository.object.__typename === 'Commit')
+  assert.strictEqual(checks.repository.object.__typename, 'Commit')
 
   const workflowRuns: WorkflowRun[] = []
   assert(checks.repository.object.checkSuites != null)

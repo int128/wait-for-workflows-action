@@ -57,7 +57,7 @@ export const paginate = async (
 
   assert(checks.repository != null)
   assert(checks.repository.object != null)
-  assert(checks.repository.object.__typename === 'Commit')
+  assert.strictEqual(checks.repository.object.__typename, 'Commit')
 
   // Immediately return if the rollup status is failure, in order to reduce API calls
   assert(checks.repository.object.statusCheckRollup != null)
@@ -76,7 +76,7 @@ export const paginate = async (
   })
   assert(next.repository != null)
   assert(next.repository.object != null)
-  assert(next.repository.object.__typename === 'Commit')
+  assert.strictEqual(next.repository.object.__typename, 'Commit')
   assert(next.repository.object.checkSuites != null)
   assert(next.repository.object.checkSuites.nodes != null)
 
