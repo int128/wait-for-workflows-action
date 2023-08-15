@@ -21,6 +21,8 @@ jobs:
       - uses: int128/wait-for-workflows-action@v1
 ```
 
+### Branch protection rule
+
 You can set up a branch protection rule with the status check of `wait-for-workflows`.
 For example,
 
@@ -28,9 +30,15 @@ For example,
 
 A pull request status looks like:
 
-<img width="910" alt="image" src="https://github.com/int128/wait-for-workflows-action/assets/321266/e8bcce10-f67e-4ded-8a01-d224abd39018">
+<img width="910" alt="image" src="https://github.com/int128/wait-for-workflows-action/assets/321266/167214a3-a5b9-40ce-84a6-0d39cfba5856">
 
 ## Specification
+
+This action waits for the statuses of workflow runs at the current commit SHA.
+
+- If any workflow run is not completed, poll the status.
+- If any workflow run is failed, exit with an error.
+- Otherwise, exit successfully.
 
 ### Inputs
 
