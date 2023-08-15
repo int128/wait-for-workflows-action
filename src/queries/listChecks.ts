@@ -1,13 +1,13 @@
 import * as core from '@actions/core'
 import { GitHub } from '@actions/github/lib/utils'
-import { ActionsChecksQuery, ActionsChecksQueryVariables } from '../generated/graphql'
+import { ListChecksQuery, ListChecksQueryVariables } from '../generated/graphql'
 import assert from 'assert'
 import { StatusState } from '../generated/graphql-types'
 
 type Octokit = InstanceType<typeof GitHub>
 
 const query = /* GraphQL */ `
-  query actionsChecks($owner: String!, $name: String!, $oid: GitObjectID!, $appId: Int!, $afterCursor: String) {
+  query listChecks($owner: String!, $name: String!, $oid: GitObjectID!, $appId: Int!, $afterCursor: String) {
     rateLimit {
       cost
     }
@@ -43,13 +43,13 @@ const query = /* GraphQL */ `
 
 export const withOctokit =
   (o: Octokit) =>
-  async (v: ActionsChecksQueryVariables): Promise<ActionsChecksQuery> =>
+  async (v: ListChecksQueryVariables): Promise<ListChecksQuery> =>
     await o.graphql(query, v)
 
 export const paginate = async (
-  listChecks: (v: ActionsChecksQueryVariables) => Promise<ActionsChecksQuery>,
-  v: ActionsChecksQueryVariables,
-): Promise<ActionsChecksQuery> => {
+  listChecks: (v: ListChecksQueryVariables) => Promise<ListChecksQuery>,
+  v: ListChecksQueryVariables,
+): Promise<ListChecksQuery> => {
   core.startGroup(`Query actionsChecks(${JSON.stringify(v)})`)
   const checks = await listChecks(v)
   core.debug(JSON.stringify(checks, undefined, 2))
