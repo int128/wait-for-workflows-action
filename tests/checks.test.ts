@@ -7,6 +7,7 @@ describe('summarize', () => {
       {
         rateLimit: {
           cost: 1,
+          remaining: 5000,
         },
         repository: {
           object: {
