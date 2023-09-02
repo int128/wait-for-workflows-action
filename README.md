@@ -94,4 +94,7 @@ See [rate limiting](https://docs.github.com/en/rest/overview/resources-in-the-re
 
 ### Outputs
 
-None.
+| Name                    | Description                   |
+| ----------------------- | ----------------------------- |
+| `rollup-state`          | Either `SUCCESS` or `FAILURE` |
+| `failed-workflow-names` | List of failed workflow names |

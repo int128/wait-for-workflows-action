@@ -3,7 +3,7 @@ import * as minimatch from 'minimatch'
 import { ListChecksQuery } from './generated/graphql'
 import { CheckConclusionState, CheckStatusState, StatusState } from './generated/graphql-types'
 
-export type Summary = {
+export type Rollup = {
   state: State
   workflowRuns: WorkflowRun[]
 }
@@ -22,7 +22,7 @@ type RollupOptions = {
   excludeWorkflowNames: string[]
 }
 
-export const rollupChecks = (checks: ListChecksQuery, options: RollupOptions): Summary => {
+export const rollupChecks = (checks: ListChecksQuery, options: RollupOptions): Rollup => {
   assert(checks.repository != null)
   assert(checks.repository.object != null)
   assert.strictEqual(checks.repository.object.__typename, 'Commit')
