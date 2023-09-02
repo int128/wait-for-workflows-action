@@ -10,6 +10,9 @@ inputs:
     description: Polling period in seconds
     required: true
     default: '15'
+  exclude-workflow-names:
+    description: Exclude specified workflows (multiline)
+    required: false
   sha:
     description: Commit SHA to wait for
     required: true
