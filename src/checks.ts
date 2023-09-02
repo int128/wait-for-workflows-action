@@ -40,13 +40,14 @@ export const rollupChecks = (checks: ListChecksQuery, options: RollupOptions): S
     }
   })
 
-  const excludeWorkflowNameFilters = options.excludeWorkflowNames.map((pattern) => minimatch.filter(pattern))
+  const excludeWorkflowNameMatchers = options.excludeWorkflowNames.map((pattern) => minimatch.filter(pattern))
   const workflowRuns = rawWorkflowRuns.filter((workflowRun) => {
     // exclude self to prevent an infinite loop
     if (workflowRun.workflowName === options.selfWorkflowName) {
       return false
     }
-    if (excludeWorkflowNameFilters.some((match) => match(workflowRun.workflowName))) {
+    // exclude the specified workflow names
+    if (excludeWorkflowNameMatchers.some((match) => match(workflowRun.workflowName))) {
       return false
     }
     return true
