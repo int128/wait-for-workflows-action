@@ -22,6 +22,12 @@ inputs:
     required: true
     default: ${{ github.token }}
 
+outputs:
+  rollup-state:
+    description: Either SUCCESS or FAILURE
+  failed-workflow-names:
+    description: List of failed workflow names (multiline)
+
 runs:
   using: 'node16'
   main: 'dist/index.js'

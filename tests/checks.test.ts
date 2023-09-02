@@ -1,4 +1,4 @@
-import { Summary, rollupWorkflowRuns, rollupChecks } from '../src/checks'
+import { Rollup, rollupWorkflowRuns, rollupChecks } from '../src/checks'
 import { ListChecksQuery } from '../src/generated/graphql'
 import { CheckConclusionState, CheckStatusState, StatusState } from '../src/generated/graphql-types'
 
@@ -54,7 +54,7 @@ describe('rollupChecks', () => {
   }
   it('should exclude self workflow', () => {
     const rollup = rollupChecks(query, { selfWorkflowName: 'workflow-3', excludeWorkflowNames: [] })
-    expect(rollup).toStrictEqual<Summary>({
+    expect(rollup).toStrictEqual<Rollup>({
       state: StatusState.Success,
       workflowRuns: [
         {
@@ -74,7 +74,7 @@ describe('rollupChecks', () => {
   })
   it('should exclude given workflows', () => {
     const rollup = rollupChecks(query, { selfWorkflowName: 'workflow-3', excludeWorkflowNames: ['*-1'] })
-    expect(rollup).toStrictEqual<Summary>({
+    expect(rollup).toStrictEqual<Rollup>({
       state: StatusState.Success,
       workflowRuns: [
         {
@@ -88,7 +88,7 @@ describe('rollupChecks', () => {
   })
   it(`should return ${StatusState.Success} if no workflow`, () => {
     const rollup = rollupChecks(query, { selfWorkflowName: 'workflow-3', excludeWorkflowNames: ['*'] })
-    expect(rollup).toStrictEqual<Summary>({
+    expect(rollup).toStrictEqual<Rollup>({
       state: StatusState.Success,
       workflowRuns: [],
     })
