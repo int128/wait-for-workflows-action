@@ -10,7 +10,7 @@ const main = async (): Promise<void> => {
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,
     selfWorkflowName: github.context.workflow,
-  token: core.getInput('token', { required: true }),
+    token: core.getInput('token', { required: true }),
   })
 }
 
