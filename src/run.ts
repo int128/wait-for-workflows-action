@@ -11,29 +11,27 @@ type Inputs = {
   initialDelaySeconds: number
   periodSeconds: number
   sha: string
+  owner: string
+  repo: string
+  selfWorkflowName: string
   token: string
 }
 
 export const run = async (inputs: Inputs): Promise<void> => {
   const octokit = github.getOctokit(inputs.token)
 
-  // exclude self to prevent an infinite loop
-  const selfWorkflowName = github.context.workflow
-  const excludeWorkflowNames = [selfWorkflowName]
-  core.info(`Excluding workflows: ${excludeWorkflowNames.join(', ')}`)
-
   core.info(`Waiting for initial delay ${inputs.initialDelaySeconds}s`)
   await sleep(inputs.initialDelaySeconds * 1000)
 
   for (;;) {
     const checks = await listChecks.paginate(listChecks.withOctokit(octokit), {
-      owner: github.context.repo.owner,
-      name: github.context.repo.repo,
+      owner: inputs.owner,
+      name: inputs.repo,
       oid: inputs.sha,
       appId: GITHUB_ACTIONS_APP_ID,
     })
 
-    const summary = summarize(checks, excludeWorkflowNames)
+    const summary = summarize(checks, inputs.selfWorkflowName)
     core.startGroup(`State: ${summary.state}`)
     for (const run of summary.workflowRuns) {
       core.info(`${run.status}: ${run.conclusion}: ${run.workflowName} (${run.event})`)

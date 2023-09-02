@@ -16,7 +16,7 @@ type WorkflowRun = {
   workflowName: string
 }
 
-export const summarize = (checks: ListChecksQuery, excludeWorkflowNames: string[]): Summary => {
+export const summarize = (checks: ListChecksQuery, selfWorkflowName: string): Summary => {
   assert(checks.repository != null)
   assert(checks.repository.object != null)
   assert.strictEqual(checks.repository.object.__typename, 'Commit')
@@ -28,9 +28,10 @@ export const summarize = (checks: ListChecksQuery, excludeWorkflowNames: string[
     assert(node != null)
     assert(node.conclusion !== undefined)
     assert(node.workflowRun != null)
-
     const workflowName = node.workflowRun.workflow.name
-    if (excludeWorkflowNames.includes(workflowName)) {
+
+    // exclude self to prevent an infinite loop
+    if (workflowName === selfWorkflowName) {
       continue
     }
 

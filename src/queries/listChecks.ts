@@ -42,52 +42,53 @@ const query = /* GraphQL */ `
   }
 `
 
+type QueryFunction = (v: ListChecksQueryVariables) => Promise<ListChecksQuery>
+
 export const withOctokit =
-  (o: Octokit) =>
-  async (v: ListChecksQueryVariables): Promise<ListChecksQuery> =>
+  (o: Octokit): QueryFunction =>
+  async (v: ListChecksQueryVariables) =>
     await o.graphql(query, v)
 
 export const paginate = async (
-  listChecks: (v: ListChecksQueryVariables) => Promise<ListChecksQuery>,
+  fn: QueryFunction,
   v: ListChecksQueryVariables,
+  previous?: ListChecksQuery,
 ): Promise<ListChecksQuery> => {
   core.startGroup(`ListChecksQuery(${JSON.stringify(v)})`)
-  const checks = await listChecks(v)
-  core.debug(JSON.stringify(checks, undefined, 2))
+  const query = await fn(v)
+  core.debug(JSON.stringify(query, undefined, 2))
   core.endGroup()
 
-  assert(checks.rateLimit != null)
-  core.info(`Rate-limit: cost=${checks.rateLimit.cost}, remaining=${checks.rateLimit.remaining}`)
+  assert(query.rateLimit != null)
+  assert(query.repository != null)
+  assert(query.repository.object != null)
+  assert.strictEqual(query.repository.object.__typename, 'Commit')
+  assert(query.repository.object.checkSuites != null)
+  assert(query.repository.object.checkSuites.nodes != null)
 
-  assert(checks.repository != null)
-  assert(checks.repository.object != null)
-  assert.strictEqual(checks.repository.object.__typename, 'Commit')
+  if (previous !== undefined) {
+    assert(previous.repository != null)
+    assert(previous.repository.object != null)
+    assert.strictEqual(previous.repository.object.__typename, 'Commit')
+    assert(previous.repository.object.checkSuites != null)
+    assert(previous.repository.object.checkSuites.nodes != null)
+    query.repository.object.checkSuites.nodes.unshift(...previous.repository.object.checkSuites.nodes)
+  }
+
+  core.info(
+    `Received ${query.repository.object.checkSuites.nodes.length} / ${query.repository.object.checkSuites.totalCount} checkSuites ` +
+      `(rate-limit-remaining: ${query.rateLimit.remaining})`,
+  )
 
   // Immediately return if the rollup status is failure, in order to reduce API calls
-  assert(checks.repository.object.statusCheckRollup != null)
-  if (checks.repository.object.statusCheckRollup.state === StatusState.Failure) {
-    return checks
+  assert(query.repository.object.statusCheckRollup != null)
+  if (query.repository.object.statusCheckRollup.state === StatusState.Failure) {
+    return query
   }
 
-  assert(checks.repository.object.checkSuites != null)
-  if (!checks.repository.object.checkSuites.pageInfo.hasNextPage) {
-    return checks
+  if (!query.repository.object.checkSuites.pageInfo.hasNextPage) {
+    return query
   }
-
-  const next = await paginate(listChecks, {
-    ...v,
-    afterCursor: checks.repository.object.checkSuites.pageInfo.endCursor,
-  })
-  assert(next.repository != null)
-  assert(next.repository.object != null)
-  assert.strictEqual(next.repository.object.__typename, 'Commit')
-  assert(next.repository.object.checkSuites != null)
-  assert(next.repository.object.checkSuites.nodes != null)
-
-  assert(checks.repository.object.checkSuites.nodes != null)
-  next.repository.object.checkSuites.nodes = [
-    ...checks.repository.object.checkSuites.nodes,
-    ...next.repository.object.checkSuites.nodes,
-  ]
-  return next
+  const afterCursor = query.repository.object.checkSuites.pageInfo.endCursor
+  return await paginate(fn, { ...v, afterCursor }, query)
 }

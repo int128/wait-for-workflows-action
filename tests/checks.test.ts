@@ -56,7 +56,7 @@ describe('summarize', () => {
           },
         },
       },
-      ['workflow-3'],
+      'workflow-3',
     )
     expect(summary).toStrictEqual<Summary>({
       state: StatusState.Success,
