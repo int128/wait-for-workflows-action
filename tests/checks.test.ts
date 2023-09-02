@@ -1,64 +1,60 @@
-import { Summary, rollup, summarize } from '../src/checks'
+import { Summary, rollupWorkflowRuns, rollupChecks } from '../src/checks'
+import { ListChecksQuery } from '../src/generated/graphql'
 import { CheckConclusionState, CheckStatusState, StatusState } from '../src/generated/graphql-types'
 
-describe('summarize', () => {
-  it('should exclude given workflows', () => {
-    const summary = summarize(
-      {
-        rateLimit: {
-          cost: 1,
-          remaining: 5000,
-        },
-        repository: {
-          object: {
-            __typename: 'Commit',
-            statusCheckRollup: {
-              state: StatusState.Pending,
-            },
-            checkSuites: {
-              totalCount: 3,
-              pageInfo: {
-                hasNextPage: false,
-              },
-              nodes: [
-                {
-                  workflowRun: {
-                    event: 'pull_request_target',
-                    workflow: {
-                      name: 'workflow-1',
-                    },
-                  },
-                  status: CheckStatusState.Completed,
-                  conclusion: CheckConclusionState.Skipped,
-                },
-                {
-                  workflowRun: {
-                    event: 'pull_request',
-                    workflow: {
-                      name: 'workflow-2',
-                    },
-                  },
-                  status: CheckStatusState.Completed,
-                  conclusion: CheckConclusionState.Success,
-                },
-                {
-                  workflowRun: {
-                    event: 'pull_request',
-                    workflow: {
-                      name: 'workflow-3',
-                    },
-                  },
-                  status: CheckStatusState.InProgress,
-                  conclusion: null,
-                },
-              ],
-            },
+describe('rollupChecks', () => {
+  const query: ListChecksQuery = {
+    rateLimit: {
+      cost: 1,
+      remaining: 5000,
+    },
+    repository: {
+      object: {
+        __typename: 'Commit',
+        checkSuites: {
+          totalCount: 3,
+          pageInfo: {
+            hasNextPage: false,
           },
+          nodes: [
+            {
+              workflowRun: {
+                event: 'pull_request_target',
+                workflow: {
+                  name: 'workflow-1',
+                },
+              },
+              status: CheckStatusState.Completed,
+              conclusion: CheckConclusionState.Skipped,
+            },
+            {
+              workflowRun: {
+                event: 'pull_request',
+                workflow: {
+                  name: 'workflow-2',
+                },
+              },
+              status: CheckStatusState.Completed,
+              conclusion: CheckConclusionState.Success,
+            },
+            {
+              workflowRun: {
+                event: 'pull_request',
+                workflow: {
+                  name: 'workflow-3',
+                },
+              },
+              status: CheckStatusState.InProgress,
+              conclusion: null,
+            },
+          ],
         },
       },
-      'workflow-3',
-    )
-    expect(summary).toStrictEqual<Summary>({
+    },
+  }
+  it('should exclude self workflow', () => {
+    const rollup = rollupChecks(query, { selfWorkflowName: 'workflow-3', excludeWorkflowNames: [] })
+    expect(rollup).toStrictEqual<Summary>({
       state: StatusState.Success,
       workflowRuns: [
         {
@@ -76,23 +72,32 @@ describe('summarize', () => {
       ],
     })
   })
+  it('should exclude given workflows', () => {
+    const rollup = rollupChecks(query, { selfWorkflowName: 'workflow-3', excludeWorkflowNames: ['*-1'] })
+    expect(rollup).toStrictEqual<Summary>({
+      state: StatusState.Success,
+      workflowRuns: [
+        {
+          status: CheckStatusState.Completed,
+          conclusion: CheckConclusionState.Success,
+          event: 'pull_request',
+          workflowName: 'workflow-2',
+        },
+      ],
+    })
+  })
+  it(`should return ${StatusState.Success} if no workflow`, () => {
+    const rollup = rollupChecks(query, { selfWorkflowName: 'workflow-3', excludeWorkflowNames: ['*'] })
+    expect(rollup).toStrictEqual<Summary>({
+      state: StatusState.Success,
+      workflowRuns: [],
+    })
+  })
 })
 
-describe('rollup', () => {
-  it(`should return ${StatusState.Failure} if rollup state is ${StatusState.Failure} regardless of workflow runs`, () => {
-    const state = rollup(StatusState.Failure, [
-      {
-        status: CheckStatusState.InProgress,
-        conclusion: null,
-        event: 'pull_request',
-        workflowName: 'test',
-      },
-    ])
-    expect(state).toBe(StatusState.Failure)
-  })
-
+describe('rollupWorkflowRuns', () => {
   it(`should return ${StatusState.Success} if no workflow run is given`, () => {
-    const state = rollup(StatusState.Pending, [])
+    const state = rollupWorkflowRuns([])
     expect(state).toBe(StatusState.Success)
   })
 
@@ -122,7 +127,7 @@ describe('rollup', () => {
   ])(
     `should return ${StatusState.Success} if all workflow runs are ${CheckConclusionState.Success}`,
     ({ workflowRuns }) => {
-      const state = rollup(StatusState.Pending, workflowRuns)
+      const state = rollupWorkflowRuns(workflowRuns)
       expect(state).toBe(StatusState.Success)
     },
   )
@@ -137,7 +142,7 @@ describe('rollup', () => {
   ])(
     `should return ${StatusState.Failure} if any workflow run is ${CheckConclusionState.Failure}`,
     ({ workflowRuns }) => {
-      const state = rollup(StatusState.Pending, workflowRuns)
+      const state = rollupWorkflowRuns(workflowRuns)
       expect(state).toBe(StatusState.Failure)
     },
   )
@@ -152,7 +157,7 @@ describe('rollup', () => {
   ])(
     `should return ${StatusState.Pending} if any workflow run is not ${CheckStatusState.Completed}`,
     ({ workflowRuns }) => {
-      const state = rollup(StatusState.Pending, workflowRuns)
+      const state = rollupWorkflowRuns(workflowRuns)
       expect(state).toBe(StatusState.Pending)
     },
   )

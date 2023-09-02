@@ -2,7 +2,6 @@ import * as core from '@actions/core'
 import { GitHub } from '@actions/github/lib/utils'
 import { ListChecksQuery, ListChecksQueryVariables } from '../generated/graphql'
 import assert from 'assert'
-import { StatusState } from '../generated/graphql-types'
 
 type Octokit = InstanceType<typeof GitHub>
 
@@ -16,9 +15,6 @@ const query = /* GraphQL */ `
       object(oid: $oid) {
         __typename
         ... on Commit {
-          statusCheckRollup {
-            state
-          }
           checkSuites(filterBy: { appId: $appId }, first: 100, after: $afterCursor) {
             totalCount
             pageInfo {
@@ -79,12 +75,6 @@ export const paginate = async (
     `Received ${query.repository.object.checkSuites.nodes.length} / ${query.repository.object.checkSuites.totalCount} checkSuites ` +
       `(rate-limit-remaining: ${query.rateLimit.remaining})`,
   )
-
-  // Immediately return if the rollup status is failure, in order to reduce API calls
-  assert(query.repository.object.statusCheckRollup != null)
-  if (query.repository.object.statusCheckRollup.state === StatusState.Failure) {
-    return query
-  }
 
   if (!query.repository.object.checkSuites.pageInfo.hasNextPage) {
     return query

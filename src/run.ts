@@ -1,7 +1,7 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import * as listChecks from './queries/listChecks'
-import { filterFailedWorkflowRuns, summarize } from './checks'
+import { filterFailedWorkflowRuns, rollupChecks } from './checks'
 import { StatusState } from './generated/graphql-types'
 
 // https://api.github.com/apps/github-actions
@@ -10,6 +10,7 @@ const GITHUB_ACTIONS_APP_ID = 15368
 type Inputs = {
   initialDelaySeconds: number
   periodSeconds: number
+  excludeWorkflowNames: string[]
   sha: string
   owner: string
   repo: string
@@ -31,18 +32,18 @@ export const run = async (inputs: Inputs): Promise<void> => {
       appId: GITHUB_ACTIONS_APP_ID,
     })
 
-    const summary = summarize(checks, inputs.selfWorkflowName)
-    core.startGroup(`State: ${summary.state}`)
-    for (const run of summary.workflowRuns) {
+    const rollup = rollupChecks(checks, inputs)
+    core.startGroup(`Rollup state: ${rollup.state}`)
+    for (const run of rollup.workflowRuns) {
       core.info(`${run.status}: ${run.conclusion}: ${run.workflowName} (${run.event})`)
     }
     core.endGroup()
 
-    if (summary.state === StatusState.Success) {
+    if (rollup.state === StatusState.Success) {
       return
     }
-    if (summary.state === StatusState.Failure) {
-      const failedWorkflowNames = filterFailedWorkflowRuns(summary.workflowRuns).map((run) => run.workflowName)
+    if (rollup.state === StatusState.Failure) {
+      const failedWorkflowNames = filterFailedWorkflowRuns(rollup.workflowRuns).map((run) => run.workflowName)
       throw new Error(`Failed workflows: ${failedWorkflowNames.join(', ')}`)
     }
 
