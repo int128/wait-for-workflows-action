@@ -10,6 +10,7 @@ const query = /* GraphQL */ `
   query listChecks($owner: String!, $name: String!, $oid: GitObjectID!, $appId: Int!, $afterCursor: String) {
     rateLimit {
       cost
+      remaining
     }
     repository(owner: $owner, name: $name) {
       object(oid: $oid) {
@@ -54,6 +55,9 @@ export const paginate = async (
   const checks = await listChecks(v)
   core.debug(JSON.stringify(checks, undefined, 2))
   core.endGroup()
+
+  assert(checks.rateLimit != null)
+  core.info(`Rate-limit: cost=${checks.rateLimit.cost}, remaining=${checks.rateLimit.remaining}`)
 
   assert(checks.repository != null)
   assert(checks.repository.object != null)
