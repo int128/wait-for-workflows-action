@@ -38,14 +38,14 @@ Therefore, a pull request status looks like:
 
 <img width="910" alt="image" src="https://github.com/int128/wait-for-workflows-action/assets/321266/167214a3-a5b9-40ce-84a6-0d39cfba5856">
 
-## Considerations
+## How it works
 
 This action fetches the workflow runs against the current commit SHA.
 It determines the rollup state as follows:
 
-- If any workflow run is failing, exit with an error.
-- If all workflow runs are completed, exit successfully.
-- Otherwise, try again.
+- If any workflow run is failing, this action exits with an error.
+- If all workflow runs are completed, this action exits successfully.
+- Otherwise, check again.
 
 It excludes the workflow of self to prevent an infinite loop.
 
@@ -65,6 +65,20 @@ jobs:
           exclude-workflow-names: |
             * / generate-graphql
 ```
+
+## Caveat
+
+### Cost of GitHub-hosted runners :moneybag:
+
+This action runs until all workflows are completed.
+It may increase the cost of GitHub-hosted runners.
+If your repository is private, it is strongly recommended to use your self-hosted runners.
+
+### GitHub API rate limit
+
+This action calls the GitHub GraphQL API until all workflows are completed.
+It is recommended to use a token of GitHub App or PAT, instead of the default `GITHUB_TOKEN`.
+See [rate limiting](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting) for details.
 
 ## Specification
 
