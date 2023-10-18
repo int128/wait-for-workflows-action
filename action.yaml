@@ -10,6 +10,10 @@ inputs:
     description: Polling period in seconds
     required: true
     default: '15'
+  filter-workflow-events:
+    description: Filter workflows by events (multiline)
+    required: false
+    default: ${{ github.event_name }}
   exclude-workflow-names:
     description: Exclude specified workflows (multiline)
     required: false

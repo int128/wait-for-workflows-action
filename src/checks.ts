@@ -19,6 +19,7 @@ type WorkflowRun = {
 
 type RollupOptions = {
   selfWorkflowName: string
+  filterWorkflowEvents: string[]
   excludeWorkflowNames: string[]
 }
 
@@ -44,6 +45,10 @@ export const rollupChecks = (checks: ListChecksQuery, options: RollupOptions): R
   const workflowRuns = rawWorkflowRuns.filter((workflowRun) => {
     // exclude self to prevent an infinite loop
     if (workflowRun.workflowName === options.selfWorkflowName) {
+      return false
+    }
+    // filter workflows by event
+    if (options.filterWorkflowEvents.length > 0 && !options.filterWorkflowEvents.includes(workflowRun.event)) {
       return false
     }
     // exclude the specified workflow names

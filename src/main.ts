@@ -6,6 +6,7 @@ const main = async (): Promise<void> => {
   await run({
     initialDelaySeconds: Number.parseInt(core.getInput('initial-delay-seconds', { required: true })),
     periodSeconds: Number.parseInt(core.getInput('period-seconds', { required: true })),
+    filterWorkflowEvents: core.getMultilineInput('filter-workflow-events'),
     excludeWorkflowNames: core.getMultilineInput('exclude-workflow-names'),
     sha: core.getInput('sha', { required: true }),
     owner: github.context.repo.owner,
