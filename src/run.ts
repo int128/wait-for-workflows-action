@@ -10,6 +10,7 @@ const GITHUB_ACTIONS_APP_ID = 15368
 type Inputs = {
   initialDelaySeconds: number
   periodSeconds: number
+  filterWorkflowEvents: string[]
   excludeWorkflowNames: string[]
   sha: string
   owner: string
@@ -19,6 +20,10 @@ type Inputs = {
 }
 
 export const run = async (inputs: Inputs): Promise<void> => {
+  core.info(`Target commit is ${inputs.sha}`)
+  core.info(`Filtering workflows by event: ${inputs.filterWorkflowEvents.join(', ')}`)
+  core.info(`Excluding workflow name: ${inputs.excludeWorkflowNames.join(', ')}`)
+
   core.info(`Waiting for initial delay ${inputs.initialDelaySeconds}s`)
   await sleep(inputs.initialDelaySeconds * 1000)
 
