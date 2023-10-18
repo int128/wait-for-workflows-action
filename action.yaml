@@ -29,5 +29,5 @@ outputs:
     description: List of failed workflow names (multiline)
 
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'dist/index.js'
