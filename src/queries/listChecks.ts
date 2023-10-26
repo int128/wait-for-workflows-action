@@ -1,9 +1,7 @@
-import * as core from '@actions/core'
-import { GitHub } from '@actions/github/lib/utils'
-import { ListChecksQuery, ListChecksQueryVariables } from '../generated/graphql'
 import assert from 'assert'
-
-type Octokit = InstanceType<typeof GitHub>
+import * as core from '@actions/core'
+import { ListChecksQuery, ListChecksQueryVariables } from '../generated/graphql'
+import { Octokit } from '../github'
 
 const query = /* GraphQL */ `
   query listChecks($owner: String!, $name: String!, $oid: GitObjectID!, $appId: Int!, $afterCursor: String) {

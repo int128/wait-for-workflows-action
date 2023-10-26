@@ -1,8 +1,8 @@
 import * as core from '@actions/core'
-import * as github from '@actions/github'
 import * as listChecks from './queries/listChecks'
 import { Rollup, filterFailedWorkflowRuns, rollupChecks } from './checks'
 import { StatusState } from './generated/graphql-types'
+import { getOctokit } from './github'
 
 // https://api.github.com/apps/github-actions
 const GITHUB_ACTIONS_APP_ID = 15368
@@ -38,7 +38,7 @@ export const run = async (inputs: Inputs): Promise<void> => {
 }
 
 const poll = async (inputs: Inputs): Promise<Rollup> => {
-  const octokit = github.getOctokit(inputs.token)
+  const octokit = getOctokit(inputs.token)
   for (;;) {
     const checks = await listChecks.paginate(listChecks.withOctokit(octokit), {
       owner: inputs.owner,
