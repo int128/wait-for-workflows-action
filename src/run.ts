@@ -12,6 +12,7 @@ type Inputs = {
   periodSeconds: number
   filterWorkflowEvents: string[]
   excludeWorkflowNames: string[]
+  filterWorkflowNames: string[]
   sha: string
   owner: string
   repo: string

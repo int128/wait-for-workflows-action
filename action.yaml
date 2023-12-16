@@ -15,7 +15,10 @@ inputs:
     required: false
     default: ${{ github.event_name }}
   exclude-workflow-names:
-    description: Exclude specified workflows (multiline)
+    description: Exclude workflows by name patterns (multiline)
+    required: false
+  filter-workflow-names:
+    description: Filter workflows by name patterns (multiline)
     required: false
   sha:
     description: Commit SHA to wait for

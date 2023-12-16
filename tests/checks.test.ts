@@ -57,6 +57,7 @@ describe('rollupChecks', () => {
       selfWorkflowName: 'workflow-3',
       filterWorkflowEvents: [],
       excludeWorkflowNames: [],
+      filterWorkflowNames: [],
     })
     expect(rollup).toStrictEqual<Rollup>({
       state: StatusState.Success,
@@ -81,6 +82,7 @@ describe('rollupChecks', () => {
       selfWorkflowName: 'workflow-3',
       filterWorkflowEvents: ['pull_request_target'],
       excludeWorkflowNames: [],
+      filterWorkflowNames: [],
     })
     expect(rollup).toStrictEqual<Rollup>({
       state: StatusState.Success,
@@ -94,11 +96,31 @@ describe('rollupChecks', () => {
       ],
     })
   })
-  it('should exclude given workflows', () => {
+  it('should exclude workflows by a name', () => {
     const rollup = rollupChecks(query, {
       selfWorkflowName: 'workflow-3',
       filterWorkflowEvents: [],
       excludeWorkflowNames: ['*-1'],
+      filterWorkflowNames: [],
+    })
+    expect(rollup).toStrictEqual<Rollup>({
+      state: StatusState.Success,
+      workflowRuns: [
+        {
+          status: CheckStatusState.Completed,
+          conclusion: CheckConclusionState.Success,
+          event: 'pull_request',
+          workflowName: 'workflow-2',
+        },
+      ],
+    })
+  })
+  it('should filter workflows by a name', () => {
+    const rollup = rollupChecks(query, {
+      selfWorkflowName: 'workflow-3',
+      filterWorkflowEvents: [],
+      excludeWorkflowNames: [],
+      filterWorkflowNames: ['*-2'],
     })
     expect(rollup).toStrictEqual<Rollup>({
       state: StatusState.Success,
@@ -117,6 +139,7 @@ describe('rollupChecks', () => {
       selfWorkflowName: 'workflow-3',
       filterWorkflowEvents: [],
       excludeWorkflowNames: ['*'],
+      filterWorkflowNames: [],
     })
     expect(rollup).toStrictEqual<Rollup>({
       state: StatusState.Success,
