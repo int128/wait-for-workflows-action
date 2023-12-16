@@ -51,7 +51,7 @@ It excludes the workflow of self to prevent an infinite loop.
 
 It filters the workflows by the current event such as `push` or `pull_request`.
 
-### Exclude workflows
+### Exclude or filter workflows by name patterns
 
 By default, this action evaluates all workflow runs.
 You can exclude workflow runs by glob name patterns.
@@ -66,6 +66,20 @@ jobs:
         with:
           exclude-workflow-names: |
             * / generate-graphql
+```
+
+You can also filter workflow runs by glob name patterns.
+
+```yaml
+jobs:
+  wait-for-backend-ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: int128/wait-for-workflows-action@v1
+        with:
+          filter-workflow-names: |
+            backend / *
 ```
 
 ## Caveat
@@ -86,14 +100,15 @@ See [rate limiting](https://docs.github.com/en/rest/overview/resources-in-the-re
 
 ### Inputs
 
-| Name                     | Default                                              | Description                  |
-| ------------------------ | ---------------------------------------------------- | ---------------------------- |
-| `initial-delay-seconds`  | 10                                                   | Initial delay before polling |
-| `period-seconds`         | 15                                                   | Polling period               |
-| `filter-workflow-events` | `github.event_name`                                  | Filter workflows by events   |
-| `exclude-workflow-names` | -                                                    | Exclude specified workflows  |
-| `sha`                    | `github.event.pull_request.head.sha` or `github.sha` | Commit SHA to wait for       |
-| `token`                  | `github.token`                                       | GitHub token                 |
+| Name                     | Default                                              | Description                        |
+| ------------------------ | ---------------------------------------------------- | ---------------------------------- |
+| `initial-delay-seconds`  | 10                                                   | Initial delay before polling       |
+| `period-seconds`         | 15                                                   | Polling period                     |
+| `filter-workflow-events` | `github.event_name`                                  | Filter workflows by events         |
+| `exclude-workflow-names` | -                                                    | Exclude workflows by name patterns |
+| `filter-workflow-names`  | -                                                    | Filter workflows by name patterns  |
+| `sha`                    | `github.event.pull_request.head.sha` or `github.sha` | Commit SHA to wait for             |
+| `token`                  | `github.token`                                       | GitHub token                       |
 
 ### Outputs
 

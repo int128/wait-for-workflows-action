@@ -21,6 +21,7 @@ type RollupOptions = {
   selfWorkflowName: string
   filterWorkflowEvents: string[]
   excludeWorkflowNames: string[]
+  filterWorkflowNames: string[]
 }
 
 export const rollupChecks = (checks: ListChecksQuery, options: RollupOptions): Rollup => {
@@ -42,18 +43,30 @@ export const rollupChecks = (checks: ListChecksQuery, options: RollupOptions): R
   })
 
   const excludeWorkflowNameMatchers = options.excludeWorkflowNames.map((pattern) => minimatch.filter(pattern))
+  const filterWorkflowNameMatchers = options.filterWorkflowNames.map((pattern) => minimatch.filter(pattern))
+
   const workflowRuns = rawWorkflowRuns.filter((workflowRun) => {
     // exclude self to prevent an infinite loop
     if (workflowRun.workflowName === options.selfWorkflowName) {
       return false
     }
     // filter workflows by event
-    if (options.filterWorkflowEvents.length > 0 && !options.filterWorkflowEvents.includes(workflowRun.event)) {
-      return false
+    if (options.filterWorkflowEvents.length > 0) {
+      if (!options.filterWorkflowEvents.includes(workflowRun.event)) {
+        return false
+      }
     }
-    // exclude the specified workflow names
-    if (excludeWorkflowNameMatchers.some((match) => match(workflowRun.workflowName))) {
-      return false
+    // exclude workflows by names
+    if (excludeWorkflowNameMatchers.length > 0) {
+      if (excludeWorkflowNameMatchers.some((match) => match(workflowRun.workflowName))) {
+        return false
+      }
+    }
+    // filter workflows by names
+    if (filterWorkflowNameMatchers.length > 0) {
+      if (!filterWorkflowNameMatchers.some((match) => match(workflowRun.workflowName))) {
+        return false
+      }
     }
     return true
   })
