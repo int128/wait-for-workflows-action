@@ -1,8 +1,8 @@
 import * as core from '@actions/core'
-import * as listChecks from './queries/listChecks'
-import { Rollup, filterFailedWorkflowRuns, rollupChecks } from './checks'
-import { StatusState } from './generated/graphql-types'
-import { getOctokit } from './github'
+import * as listChecks from './queries/listChecks.js'
+import { Rollup, filterFailedWorkflowRuns, rollupChecks } from './checks.js'
+import { StatusState } from './generated/graphql-types.js'
+import { getOctokit } from './github.js'
 
 // https://api.github.com/apps/github-actions
 const GITHUB_ACTIONS_APP_ID = 15368

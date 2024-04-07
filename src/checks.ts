@@ -1,7 +1,7 @@
 import assert from 'assert'
 import * as minimatch from 'minimatch'
-import { ListChecksQuery } from './generated/graphql'
-import { CheckConclusionState, CheckStatusState, StatusState } from './generated/graphql-types'
+import { ListChecksQuery } from './generated/graphql.js'
+import { CheckConclusionState, CheckStatusState, StatusState } from './generated/graphql-types.js'
 
 export type Rollup = {
   state: State

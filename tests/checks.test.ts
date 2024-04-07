@@ -1,6 +1,6 @@
-import { Rollup, rollupWorkflowRuns, rollupChecks } from '../src/checks'
-import { ListChecksQuery } from '../src/generated/graphql'
-import { CheckConclusionState, CheckStatusState, StatusState } from '../src/generated/graphql-types'
+import { Rollup, rollupWorkflowRuns, rollupChecks } from '../src/checks.js'
+import { ListChecksQuery } from '../src/generated/graphql.js'
+import { CheckConclusionState, CheckStatusState, StatusState } from '../src/generated/graphql-types.js'
 
 describe('rollupChecks', () => {
   const query: ListChecksQuery = {
