@@ -75,7 +75,12 @@ export const rollupChecks = (checks: ListChecksQuery, options: RollupOptions): R
 }
 
 export const rollupWorkflowRuns = (workflowRuns: WorkflowRun[]): State => {
-  if (workflowRuns.some((run) => run.conclusion === CheckConclusionState.Failure)) {
+  if (workflowRuns.some((run) => 
+    run.conclusion === CheckConclusionState.Failure
+  || run.conclusion === CheckConclusionState.Cancelled
+  || run.conclusion === CheckConclusionState.StartupFailure
+  || run.conclusion === CheckConclusionState.TimedOut
+)) {
     return StatusState.Failure
   }
   if (workflowRuns.every((run) => run.status === CheckStatusState.Completed)) {
