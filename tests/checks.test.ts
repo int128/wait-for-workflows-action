@@ -20,6 +20,7 @@ describe('rollupChecks', () => {
             {
               workflowRun: {
                 event: 'pull_request_target',
+                url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/1',
                 workflow: {
                   name: 'workflow-1',
                 },
@@ -30,6 +31,7 @@ describe('rollupChecks', () => {
             {
               workflowRun: {
                 event: 'pull_request',
+                url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/2',
                 workflow: {
                   name: 'workflow-2',
                 },
@@ -40,6 +42,7 @@ describe('rollupChecks', () => {
             {
               workflowRun: {
                 event: 'pull_request',
+                url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/3',
                 workflow: {
                   name: 'workflow-3',
                 },
@@ -66,12 +69,14 @@ describe('rollupChecks', () => {
           status: CheckStatusState.Completed,
           conclusion: CheckConclusionState.Skipped,
           event: 'pull_request_target',
+          url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/1',
           workflowName: 'workflow-1',
         },
         {
           status: CheckStatusState.Completed,
           conclusion: CheckConclusionState.Success,
           event: 'pull_request',
+          url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/2',
           workflowName: 'workflow-2',
         },
       ],
@@ -91,6 +96,7 @@ describe('rollupChecks', () => {
           status: CheckStatusState.Completed,
           conclusion: CheckConclusionState.Skipped,
           event: 'pull_request_target',
+          url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/1',
           workflowName: 'workflow-1',
         },
       ],
@@ -110,6 +116,7 @@ describe('rollupChecks', () => {
           status: CheckStatusState.Completed,
           conclusion: CheckConclusionState.Success,
           event: 'pull_request',
+          url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/2',
           workflowName: 'workflow-2',
         },
       ],
@@ -129,6 +136,7 @@ describe('rollupChecks', () => {
           status: CheckStatusState.Completed,
           conclusion: CheckConclusionState.Success,
           event: 'pull_request',
+          url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/2',
           workflowName: 'workflow-2',
         },
       ],
@@ -158,18 +166,21 @@ describe('rollupWorkflowRuns', () => {
     status: CheckStatusState.Completed,
     conclusion: CheckConclusionState.Success,
     event: 'pull_request',
+    url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/1',
     workflowName: 'test-success',
   }
   const runFailure = {
     status: CheckStatusState.Completed,
     conclusion: CheckConclusionState.Failure,
     event: 'pull_request',
+    url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/1',
     workflowName: 'test-failure',
   }
   const runInProgress = {
     status: CheckStatusState.InProgress,
     conclusion: null,
     event: 'pull_request',
+    url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/1',
     workflowName: 'test-in-progress',
   }
 
