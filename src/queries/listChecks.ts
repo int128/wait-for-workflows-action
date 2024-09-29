@@ -22,6 +22,7 @@ const query = /* GraphQL */ `
             nodes {
               workflowRun {
                 event
+                url
                 workflow {
                   name
                 }
@@ -41,7 +42,8 @@ type QueryFunction = (v: ListChecksQueryVariables) => Promise<ListChecksQuery>
 const createQueryFunction =
   (octokit: Octokit): QueryFunction =>
   async (v: ListChecksQueryVariables): Promise<ListChecksQuery> =>
-    core.group(`ListChecksQuery(${JSON.stringify(v)})`, async () => {
+    core.group(`ListChecksQuery`, async () => {
+      core.info(`rateLimit.cost: ${JSON.stringify(v)}`)
       const q: ListChecksQuery = await octokit.graphql(query, v)
       assert(q.rateLimit != null)
       core.info(`rateLimit.cost: ${q.rateLimit.cost}`)

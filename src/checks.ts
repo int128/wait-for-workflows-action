@@ -14,6 +14,7 @@ type WorkflowRun = {
   status: CheckStatusState
   conclusion: CheckConclusionState | null
   event: string
+  url: string
   workflowName: string
 }
 
@@ -38,6 +39,7 @@ export const rollupChecks = (checks: ListChecksQuery, options: RollupOptions): R
       status: node.status,
       conclusion: node.conclusion,
       event: node.workflowRun.event,
+      url: node.workflowRun.url,
       workflowName: node.workflowRun.workflow.name,
     }
   })

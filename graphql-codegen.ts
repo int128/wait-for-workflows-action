@@ -19,6 +19,7 @@ const config: CodegenConfig = {
     // https://docs.github.com/en/graphql/reference/scalars
     scalars: {
       DateTime: 'string',
+      URI: 'string',
     },
   },
 }

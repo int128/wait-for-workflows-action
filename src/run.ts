@@ -21,15 +21,21 @@ type Inputs = {
 }
 
 export const run = async (inputs: Inputs): Promise<void> => {
-  core.info(`Target commit is ${inputs.sha}`)
+  core.info(`Target commit: ${inputs.sha}`)
   core.info(`Filtering workflows by event: ${inputs.filterWorkflowEvents.join(', ')}`)
   core.info(`Excluding workflow name: ${inputs.excludeWorkflowNames.join(', ')}`)
-
   core.info(`Waiting for initial delay ${inputs.initialDelaySeconds}s`)
   await sleep(inputs.initialDelaySeconds * 1000)
 
   const rollup = await poll(inputs)
   core.setOutput('rollup-state', rollup.state)
+  core.summary.addHeading(`Workflows: ${rollup.state}`)
+  core.summary.addList(
+    rollup.workflowRuns.map(
+      (run) => `${run.status}: ${run.conclusion}: [${run.workflowName} (${run.event})](${run.url})`,
+    ),
+  )
+
   if (rollup.state === StatusState.Failure) {
     const failedWorkflowRuns = filterFailedWorkflowRuns(rollup.workflowRuns)
     const failedWorkflowNames = failedWorkflowRuns.map((run) => run.workflowName)
@@ -49,9 +55,9 @@ const poll = async (inputs: Inputs): Promise<Rollup> => {
     })
 
     const rollup = rollupChecks(checks, inputs)
-    core.startGroup(`Rollup state: ${rollup.state}`)
+    core.startGroup(`Workflows: ${rollup.state}`)
     for (const run of rollup.workflowRuns) {
-      core.info(`${run.status}: ${run.conclusion}: ${run.workflowName} (${run.event})`)
+      core.info(`${run.status}: ${run.conclusion}: ${run.workflowName} (${run.event}): ${run.url}`)
     }
     core.endGroup()
 
