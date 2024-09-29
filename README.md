@@ -100,15 +100,16 @@ See [rate limiting](https://docs.github.com/en/rest/overview/resources-in-the-re
 
 ### Inputs
 
-| Name                     | Default                                              | Description                        |
-| ------------------------ | ---------------------------------------------------- | ---------------------------------- |
-| `initial-delay-seconds`  | 10                                                   | Initial delay before polling       |
-| `period-seconds`         | 15                                                   | Polling period                     |
-| `filter-workflow-events` | `github.event_name`                                  | Filter workflows by events         |
-| `exclude-workflow-names` | -                                                    | Exclude workflows by name patterns |
-| `filter-workflow-names`  | -                                                    | Filter workflows by name patterns  |
-| `sha`                    | `github.event.pull_request.head.sha` or `github.sha` | Commit SHA to wait for             |
-| `token`                  | `github.token`                                       | GitHub token                       |
+| Name                        | Default                                              | Description                        |
+| --------------------------- | ---------------------------------------------------- | ---------------------------------- |
+| `filter-workflow-names`     | -                                                    | Filter workflows by name patterns  |
+| `exclude-workflow-names`    | -                                                    | Exclude workflows by name patterns |
+| `filter-workflow-events`    | `github.event_name`                                  | Filter workflows by events         |
+| `initial-delay-seconds`     | 10                                                   | Initial delay before polling       |
+| `period-seconds`            | 15                                                   | Polling period                     |
+| `page-size-of-check-suites` | 100                                                  | Page size of CheckSuites query     |
+| `sha`                       | `github.event.pull_request.head.sha` or `github.sha` | Commit SHA to wait for             |
+| `token`                     | `github.token`                                       | GitHub token                       |
 
 ### Outputs
 

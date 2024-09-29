@@ -4,7 +4,14 @@ import { ListChecksQuery, ListChecksQueryVariables } from '../generated/graphql.
 import { Octokit } from '../github.js'
 
 const query = /* GraphQL */ `
-  query listChecks($owner: String!, $name: String!, $oid: GitObjectID!, $appId: Int!, $afterCheckSuite: String) {
+  query listChecks(
+    $owner: String!
+    $name: String!
+    $oid: GitObjectID!
+    $appId: Int!
+    $firstCheckSuite: Int!
+    $afterCheckSuite: String
+  ) {
     rateLimit {
       cost
       remaining
@@ -13,7 +20,7 @@ const query = /* GraphQL */ `
       object(oid: $oid) {
         __typename
         ... on Commit {
-          checkSuites(filterBy: { appId: $appId }, first: 100, after: $afterCheckSuite) {
+          checkSuites(filterBy: { appId: $appId }, first: $firstCheckSuite, after: $afterCheckSuite) {
             totalCount
             pageInfo {
               hasNextPage
