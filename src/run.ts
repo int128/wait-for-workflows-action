@@ -32,6 +32,7 @@ export const run = async (inputs: Inputs): Promise<void> => {
   const rollup = await poll(inputs)
   await writeWorkflowRunsSummary(rollup)
   core.setOutput('rollup-state', rollup.conclusion)
+  core.info(`----`)
   core.info(formatConclusion(rollup.conclusion))
   core.info(`----`)
   writeWorkflowRunsLog(rollup)
