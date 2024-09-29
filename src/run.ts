@@ -30,9 +30,13 @@ export const run = async (inputs: Inputs): Promise<void> => {
   await sleep(inputs.initialDelaySeconds * 1000)
 
   const rollup = await poll(inputs)
-  core.setOutput('rollup-state', rollup.conclusion)
   await writeWorkflowRunsSummary(rollup)
-  core.info(`You can see the summary at ${inputs.selfWorkflowURL}`)
+  core.setOutput('rollup-state', rollup.conclusion)
+  core.info(`----`)
+  core.info(formatConclusion(rollup.conclusion))
+  core.info(`----`)
+  writeWorkflowRunsLog(rollup)
+  core.info(`----`)
 
   if (rollup.conclusion === CheckConclusionState.Failure) {
     const failedWorkflowRuns = filterFailedWorkflowRuns(rollup.workflowRuns)
@@ -40,6 +44,7 @@ export const run = async (inputs: Inputs): Promise<void> => {
     core.setOutput('failed-workflow-names', failedWorkflowNames.join('\n'))
     throw new Error(`Some workflow has failed. See ${inputs.selfWorkflowURL} for the summary.`)
   }
+  core.info(`You can see the summary at ${inputs.selfWorkflowURL}`)
 }
 
 const poll = async (inputs: Inputs): Promise<Rollup> => {
@@ -53,13 +58,12 @@ const poll = async (inputs: Inputs): Promise<Rollup> => {
       firstCheckSuite: inputs.pageSizeOfCheckSuites,
     })
     const rollup = rollupChecks(checks, inputs)
-    core.startGroup(`Workflows: ${formatConclusion(rollup.conclusion)}`)
-    writeWorkflowRunsLog(rollup)
-    core.endGroup()
-
     if (rollup.conclusion !== null) {
       return rollup
     }
+    core.startGroup(`Current workflow runs`)
+    writeWorkflowRunsLog(rollup)
+    core.endGroup()
     core.info(`Waiting for period ${inputs.periodSeconds}s`)
     await sleep(inputs.periodSeconds * 1000)
   }
