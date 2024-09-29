@@ -93,7 +93,7 @@ const formatConclusion = (conclusion: CheckConclusionState | null): string => {
     case CheckConclusionState.Failure:
       return `:x: ${conclusion}`
     case CheckConclusionState.Success:
-      return `:white_check_mark ${conclusion}`
+      return `:white_check_mark: ${conclusion}`
     case null:
       return ''
   }
