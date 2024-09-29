@@ -1,7 +1,7 @@
 import * as core from '@actions/core'
-import * as listChecks from './queries/listChecks.js'
 import { Rollup, filterFailedWorkflowRuns, rollupChecks } from './checks.js'
 import { StatusState } from './generated/graphql-types.js'
+import { getListChecksQuery } from './queries/listChecks.js'
 import { getOctokit } from './github.js'
 
 // https://api.github.com/apps/github-actions
@@ -41,7 +41,7 @@ export const run = async (inputs: Inputs): Promise<void> => {
 const poll = async (inputs: Inputs): Promise<Rollup> => {
   const octokit = getOctokit(inputs.token)
   for (;;) {
-    const checks = await listChecks.paginate(listChecks.withOctokit(octokit), {
+    const checks = await getListChecksQuery(octokit, {
       owner: inputs.owner,
       name: inputs.repo,
       oid: inputs.sha,
