@@ -63,7 +63,7 @@ describe('rollupChecks', () => {
       filterWorkflowNames: [],
     })
     expect(rollup).toStrictEqual<Rollup>({
-      state: StatusState.Success,
+      conclusion: CheckConclusionState.Success,
       workflowRuns: [
         {
           status: CheckStatusState.Completed,
@@ -90,7 +90,7 @@ describe('rollupChecks', () => {
       filterWorkflowNames: [],
     })
     expect(rollup).toStrictEqual<Rollup>({
-      state: StatusState.Success,
+      conclusion: CheckConclusionState.Success,
       workflowRuns: [
         {
           status: CheckStatusState.Completed,
@@ -110,7 +110,7 @@ describe('rollupChecks', () => {
       filterWorkflowNames: [],
     })
     expect(rollup).toStrictEqual<Rollup>({
-      state: StatusState.Success,
+      conclusion: CheckConclusionState.Success,
       workflowRuns: [
         {
           status: CheckStatusState.Completed,
@@ -130,7 +130,7 @@ describe('rollupChecks', () => {
       filterWorkflowNames: ['*-2'],
     })
     expect(rollup).toStrictEqual<Rollup>({
-      state: StatusState.Success,
+      conclusion: CheckConclusionState.Success,
       workflowRuns: [
         {
           status: CheckStatusState.Completed,
@@ -150,7 +150,7 @@ describe('rollupChecks', () => {
       filterWorkflowNames: [],
     })
     expect(rollup).toStrictEqual<Rollup>({
-      state: StatusState.Success,
+      conclusion: CheckConclusionState.Success,
       workflowRuns: [],
     })
   })

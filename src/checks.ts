@@ -1,14 +1,14 @@
 import assert from 'assert'
 import * as minimatch from 'minimatch'
 import { ListChecksQuery } from './generated/graphql.js'
-import { CheckConclusionState, CheckStatusState, StatusState } from './generated/graphql-types.js'
+import { CheckConclusionState, CheckStatusState } from './generated/graphql-types.js'
 
 export type Rollup = {
-  state: State
+  conclusion: RollupConclusion
   workflowRuns: WorkflowRun[]
 }
 
-type State = StatusState.Pending | StatusState.Success | StatusState.Failure
+type RollupConclusion = CheckConclusionState.Success | CheckConclusionState.Failure | null
 
 type WorkflowRun = {
   status: CheckStatusState
@@ -73,10 +73,10 @@ export const rollupChecks = (checks: ListChecksQuery, options: RollupOptions): R
     return true
   })
   const state = rollupWorkflowRuns(workflowRuns)
-  return { state, workflowRuns }
+  return { conclusion: state, workflowRuns }
 }
 
-export const rollupWorkflowRuns = (workflowRuns: WorkflowRun[]): State => {
+export const rollupWorkflowRuns = (workflowRuns: WorkflowRun[]): RollupConclusion => {
   if (
     workflowRuns.some(
       (run) =>
@@ -86,12 +86,12 @@ export const rollupWorkflowRuns = (workflowRuns: WorkflowRun[]): State => {
         run.conclusion === CheckConclusionState.TimedOut,
     )
   ) {
-    return StatusState.Failure
+    return CheckConclusionState.Failure
   }
   if (workflowRuns.every((run) => run.status === CheckStatusState.Completed)) {
-    return StatusState.Success
+    return CheckConclusionState.Success
   }
-  return StatusState.Pending
+  return null
 }
 
 export const filterFailedWorkflowRuns = (workflowRuns: WorkflowRun[]): WorkflowRun[] =>

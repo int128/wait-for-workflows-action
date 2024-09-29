@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
 import { Rollup, filterFailedWorkflowRuns, rollupChecks } from './checks.js'
-import { CheckConclusionState, StatusState } from './generated/graphql-types.js'
+import { CheckConclusionState } from './generated/graphql-types.js'
 import { getListChecksQuery } from './queries/listChecks.js'
 import { getOctokit } from './github.js'
 
@@ -29,15 +29,15 @@ export const run = async (inputs: Inputs): Promise<void> => {
   await sleep(inputs.initialDelaySeconds * 1000)
 
   const rollup = await poll(inputs)
-  core.setOutput('rollup-state', rollup.state)
+  core.setOutput('rollup-state', rollup.conclusion)
   await writeWorkflowRunsSummary(rollup)
-  core.info(`The workflows summary is available at ${inputs.selfWorkflowURL}`)
+  core.info(`You can see the summary at ${inputs.selfWorkflowURL}`)
 
-  if (rollup.state === StatusState.Failure) {
+  if (rollup.conclusion === CheckConclusionState.Failure) {
     const failedWorkflowRuns = filterFailedWorkflowRuns(rollup.workflowRuns)
     const failedWorkflowNames = failedWorkflowRuns.map((run) => run.workflowName)
     core.setOutput('failed-workflow-names', failedWorkflowNames.join('\n'))
-    throw new Error(`Some workflow has failed. See ${inputs.selfWorkflowURL} for details.`)
+    throw new Error(`Some workflow has failed. See ${inputs.selfWorkflowURL} for the summary.`)
   }
 }
 
@@ -51,11 +51,11 @@ const poll = async (inputs: Inputs): Promise<Rollup> => {
       appId: GITHUB_ACTIONS_APP_ID,
     })
     const rollup = rollupChecks(checks, inputs)
-    core.startGroup(`Workflows: ${rollup.state}`)
+    core.startGroup(`Workflows: ${rollup.conclusion}`)
     writeWorkflowRunsLog(rollup)
     core.endGroup()
 
-    if (rollup.state === StatusState.Success || rollup.state === StatusState.Failure) {
+    if (rollup.conclusion !== null) {
       return rollup
     }
     core.info(`Waiting for period ${inputs.periodSeconds}s`)
@@ -70,7 +70,7 @@ const writeWorkflowRunsLog = (rollup: Rollup) => {
 }
 
 const writeWorkflowRunsSummary = async (rollup: Rollup) => {
-  core.summary.addHeading(`Workflows: ${rollup.state}`)
+  core.summary.addHeading(`Workflows: ${formatConclusion(rollup.conclusion)}`)
   core.summary.addTable([
     [
       { data: 'Workflow name', header: true },
