@@ -55,7 +55,6 @@ export const getListChecksQuery = async (octokit: Octokit, v: ListChecksQueryVar
   const q = await fn(v)
   const checkSuites = getCheckSuites(q)
   await paginateCheckSuites(fn, v, checkSuites)
-  core.info(`Fetched all CheckSuites`)
   return q
 }
 
