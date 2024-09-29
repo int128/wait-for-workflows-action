@@ -51,7 +51,7 @@ const poll = async (inputs: Inputs): Promise<Rollup> => {
       appId: GITHUB_ACTIONS_APP_ID,
     })
     const rollup = rollupChecks(checks, inputs)
-    core.startGroup(`Workflows: ${rollup.conclusion}`)
+    core.startGroup(`Workflows: ${formatConclusion(rollup.conclusion)}`)
     writeWorkflowRunsLog(rollup)
     core.endGroup()
 
@@ -65,12 +65,12 @@ const poll = async (inputs: Inputs): Promise<Rollup> => {
 
 const writeWorkflowRunsLog = (rollup: Rollup) => {
   for (const run of rollup.workflowRuns) {
-    core.info(`${run.status}: ${run.conclusion}: ${run.workflowName} (${run.event}): ${run.url}`)
+    core.info(`${run.status}: ${formatConclusion(run.conclusion)}: ${run.workflowName} (${run.event}): ${run.url}`)
   }
 }
 
 const writeWorkflowRunsSummary = async (rollup: Rollup) => {
-  core.summary.addHeading(`Workflows: ${formatConclusion(rollup.conclusion)}`)
+  core.summary.addHeading(formatConclusion(rollup.conclusion))
   core.summary.addTable([
     [
       { data: 'Workflow name', header: true },
@@ -91,9 +91,9 @@ const writeWorkflowRunsSummary = async (rollup: Rollup) => {
 const formatConclusion = (conclusion: CheckConclusionState | null): string => {
   switch (conclusion) {
     case CheckConclusionState.Failure:
-      return `:x: ${conclusion}`
+      return `❌ ${conclusion}`
     case CheckConclusionState.Success:
-      return `:white_check_mark: ${conclusion}`
+      return `✅ ${conclusion}`
     case null:
       return ''
   }
