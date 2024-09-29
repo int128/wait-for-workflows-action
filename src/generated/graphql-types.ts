@@ -36,7 +36,7 @@ export type Scalars = {
   /** An ISO-8601 encoded UTC date string with millisecond precision. */
   PreciseDateTime: { input: any; output: any; }
   /** An RFC 3986, RFC 3987, and RFC 6570 (level 4) compliant URI string. */
-  URI: { input: any; output: any; }
+  URI: { input: string; output: string; }
   /** A valid x509 certificate string */
   X509Certificate: { input: any; output: any; }
 };

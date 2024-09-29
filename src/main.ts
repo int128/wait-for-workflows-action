@@ -13,6 +13,7 @@ const main = async (): Promise<void> => {
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,
     selfWorkflowName: github.context.workflow,
+    selfWorkflowURL: `${github.context.serverUrl}/${github.context.repo.owner}/${github.context.repo.repo}/actions/runs/${github.context.runId}`,
     token: core.getInput('token', { required: true }),
   })
 }
