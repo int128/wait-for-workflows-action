@@ -2,8 +2,6 @@ name: release
 
 on:
   pull_request:
-    paths:
-      - .github/workflows/release.yaml
   push:
     branches:
       - main
