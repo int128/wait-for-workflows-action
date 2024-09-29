@@ -30,11 +30,18 @@ export const run = async (inputs: Inputs): Promise<void> => {
   const rollup = await poll(inputs)
   core.setOutput('rollup-state', rollup.state)
   core.summary.addHeading(`Workflows: ${rollup.state}`)
-  core.summary.addList(
-    rollup.workflowRuns.map(
-      (run) => `${run.status}: ${run.conclusion}: [${run.workflowName} (${run.event})](${run.url})`,
-    ),
-  )
+  core.summary.addTable([
+    [
+      { data: 'Workflow', header: true },
+      { data: 'Status', header: true },
+      { data: 'Conclusion', header: true },
+    ],
+    ...rollup.workflowRuns.map((run) => [
+      { data: `<a href="${run.url}">${run.workflowName} (${run.event})</a>` },
+      { data: run.status },
+      { data: run.conclusion ?? '' },
+    ]),
+  ])
 
   if (rollup.state === StatusState.Failure) {
     const failedWorkflowRuns = filterFailedWorkflowRuns(rollup.workflowRuns)
