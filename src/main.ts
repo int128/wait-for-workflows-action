@@ -3,22 +3,19 @@ import * as github from '@actions/github'
 import { run } from './run.js'
 
 const main = async (): Promise<void> => {
-  try {
-    await run({
-      initialDelaySeconds: Number.parseInt(core.getInput('initial-delay-seconds', { required: true })),
-      periodSeconds: Number.parseInt(core.getInput('period-seconds', { required: true })),
-      filterWorkflowEvents: core.getMultilineInput('filter-workflow-events'),
-      excludeWorkflowNames: core.getMultilineInput('exclude-workflow-names'),
-      filterWorkflowNames: core.getMultilineInput('filter-workflow-names'),
-      sha: core.getInput('sha', { required: true }),
-      owner: github.context.repo.owner,
-      repo: github.context.repo.repo,
-      selfWorkflowName: github.context.workflow,
-      token: core.getInput('token', { required: true }),
-    })
-  } finally {
-    await core.summary.write()
-  }
+  await run({
+    initialDelaySeconds: Number.parseInt(core.getInput('initial-delay-seconds', { required: true })),
+    periodSeconds: Number.parseInt(core.getInput('period-seconds', { required: true })),
+    filterWorkflowEvents: core.getMultilineInput('filter-workflow-events'),
+    excludeWorkflowNames: core.getMultilineInput('exclude-workflow-names'),
+    filterWorkflowNames: core.getMultilineInput('filter-workflow-names'),
+    sha: core.getInput('sha', { required: true }),
+    owner: github.context.repo.owner,
+    repo: github.context.repo.repo,
+    selfWorkflowName: github.context.workflow,
+    selfWorkflowURL: `${github.context.serverUrl}/${github.context.repo.owner}/${github.context.repo.repo}/actions/runs/${github.context.runId}`,
+    token: core.getInput('token', { required: true }),
+  })
 }
 
 main().catch((e: Error) => {
