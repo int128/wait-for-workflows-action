@@ -10,6 +10,7 @@ const GITHUB_ACTIONS_APP_ID = 15368
 type Inputs = {
   initialDelaySeconds: number
   periodSeconds: number
+  pageSizeOfCheckSuites: number
   filterWorkflowEvents: string[]
   excludeWorkflowNames: string[]
   filterWorkflowNames: string[]
@@ -49,6 +50,7 @@ const poll = async (inputs: Inputs): Promise<Rollup> => {
       name: inputs.repo,
       oid: inputs.sha,
       appId: GITHUB_ACTIONS_APP_ID,
+      firstCheckSuite: inputs.pageSizeOfCheckSuites,
     })
     const rollup = rollupChecks(checks, inputs)
     core.startGroup(`Workflows: ${formatConclusion(rollup.conclusion)}`)

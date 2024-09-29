@@ -2,6 +2,9 @@ name: wait-for-workflows
 
 on:
   pull_request:
+  push:
+    branches:
+      - main
 
 jobs:
   wait-for-workflows:
@@ -20,3 +23,4 @@ jobs:
         with:
           initial-delay-seconds: 0
           period-seconds: 3
+          page-size-of-check-suites: 1
