@@ -1,5 +1,5 @@
 import * as core from '@actions/core'
-import { Rollup, filterFailedWorkflowRuns, rollupChecks } from './checks.js'
+import { Rollup, filterFailedWorkflowRuns, formatConclusion, rollupChecks } from './checks.js'
 import { CheckConclusionState } from './generated/graphql-types.js'
 import { getListChecksQuery } from './queries/listChecks.js'
 import { getOctokit } from './github.js'
@@ -92,18 +92,6 @@ const writeWorkflowRunsSummary = async (rollup: Rollup) => {
     ]),
   ])
   await core.summary.write()
-}
-
-const formatConclusion = (conclusion: CheckConclusionState | null): string => {
-  switch (conclusion) {
-    case CheckConclusionState.Failure:
-      return `❌ ${conclusion}`
-    case CheckConclusionState.Success:
-      return `✅ ${conclusion}`
-    case null:
-      return ''
-  }
-  return conclusion
 }
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
