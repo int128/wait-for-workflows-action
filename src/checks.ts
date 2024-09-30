@@ -94,5 +94,20 @@ export const rollupWorkflowRuns = (workflowRuns: WorkflowRun[]): RollupConclusio
   return null
 }
 
+export const formatConclusion = (conclusion: CheckConclusionState | null): string => {
+  if (
+    conclusion === CheckConclusionState.Failure ||
+    conclusion === CheckConclusionState.Cancelled ||
+    conclusion === CheckConclusionState.StartupFailure ||
+    conclusion === CheckConclusionState.TimedOut
+  ) {
+    return `❌ ${conclusion}`
+  }
+  if (conclusion === CheckConclusionState.Success) {
+    return `✅ ${conclusion}`
+  }
+  return conclusion ?? ''
+}
+
 export const filterFailedWorkflowRuns = (workflowRuns: WorkflowRun[]): WorkflowRun[] =>
   workflowRuns.filter((run) => run.conclusion === CheckConclusionState.Failure)
