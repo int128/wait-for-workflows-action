@@ -12,6 +12,10 @@ inputs:
     description: Filter workflows by events (multiline)
     required: false
     default: ${{ github.event_name }}
+  fail-fast:
+    description: Exit immediately if any workflow is failing
+    required: true
+    default: 'true'
   initial-delay-seconds:
     description: Initial delay before polling in seconds
     required: true

@@ -8,12 +8,13 @@ import { getOctokit } from './github.js'
 const GITHUB_ACTIONS_APP_ID = 15368
 
 type Inputs = {
-  initialDelaySeconds: number
-  periodSeconds: number
-  pageSizeOfCheckSuites: number
   filterWorkflowEvents: string[]
   excludeWorkflowNames: string[]
   filterWorkflowNames: string[]
+  failFast: boolean
+  initialDelaySeconds: number
+  periodSeconds: number
+  pageSizeOfCheckSuites: number
   sha: string
   owner: string
   repo: string
