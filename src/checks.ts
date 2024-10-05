@@ -46,25 +46,24 @@ export const rollupChecks = (checks: ListChecksQuery, options: RollupOptions): R
 
   const excludeWorkflowNameMatchers = options.excludeWorkflowNames.map((pattern) => minimatch.filter(pattern))
   const filterWorkflowNameMatchers = options.filterWorkflowNames.map((pattern) => minimatch.filter(pattern))
-
   const workflowRuns = rawWorkflowRuns.filter((workflowRun) => {
-    // exclude self to prevent an infinite loop
+    // Exclude self to prevent the infinite loop
     if (workflowRun.workflowName === options.selfWorkflowName) {
       return false
     }
-    // filter workflows by event
+    // Filter workflows by event
     if (options.filterWorkflowEvents.length > 0) {
       if (!options.filterWorkflowEvents.includes(workflowRun.event)) {
         return false
       }
     }
-    // exclude workflows by names
+    // Exclude workflows by names
     if (excludeWorkflowNameMatchers.length > 0) {
       if (excludeWorkflowNameMatchers.some((match) => match(workflowRun.workflowName))) {
         return false
       }
     }
-    // filter workflows by names
+    // Filter workflows by names
     if (filterWorkflowNameMatchers.length > 0) {
       if (!filterWorkflowNameMatchers.some((match) => match(workflowRun.workflowName))) {
         return false
@@ -72,20 +71,21 @@ export const rollupChecks = (checks: ListChecksQuery, options: RollupOptions): R
     }
     return true
   })
-  const state = rollupWorkflowRuns(workflowRuns)
-  return { conclusion: state, workflowRuns }
+
+  return {
+    conclusion: rollupWorkflowRuns(workflowRuns),
+    workflowRuns,
+  }
 }
 
+const isFailedConclusion = (conclusion: CheckConclusionState | null): boolean =>
+  conclusion === CheckConclusionState.Failure ||
+  conclusion === CheckConclusionState.Cancelled ||
+  conclusion === CheckConclusionState.StartupFailure ||
+  conclusion === CheckConclusionState.TimedOut
+
 export const rollupWorkflowRuns = (workflowRuns: WorkflowRun[]): RollupConclusion => {
-  if (
-    workflowRuns.some(
-      (run) =>
-        run.conclusion === CheckConclusionState.Failure ||
-        run.conclusion === CheckConclusionState.Cancelled ||
-        run.conclusion === CheckConclusionState.StartupFailure ||
-        run.conclusion === CheckConclusionState.TimedOut,
-    )
-  ) {
+  if (workflowRuns.some((run) => isFailedConclusion(run.conclusion))) {
     return CheckConclusionState.Failure
   }
   if (workflowRuns.every((run) => run.status === CheckStatusState.Completed)) {
@@ -95,12 +95,7 @@ export const rollupWorkflowRuns = (workflowRuns: WorkflowRun[]): RollupConclusio
 }
 
 export const formatConclusion = (conclusion: CheckConclusionState | null): string => {
-  if (
-    conclusion === CheckConclusionState.Failure ||
-    conclusion === CheckConclusionState.Cancelled ||
-    conclusion === CheckConclusionState.StartupFailure ||
-    conclusion === CheckConclusionState.TimedOut
-  ) {
+  if (isFailedConclusion(conclusion)) {
     return `❌ ${conclusion}`
   }
   if (conclusion === CheckConclusionState.Success) {
@@ -110,4 +105,4 @@ export const formatConclusion = (conclusion: CheckConclusionState | null): strin
 }
 
 export const filterFailedWorkflowRuns = (workflowRuns: WorkflowRun[]): WorkflowRun[] =>
-  workflowRuns.filter((run) => run.conclusion === CheckConclusionState.Failure)
+  workflowRuns.filter((run) => isFailedConclusion(run.conclusion))
