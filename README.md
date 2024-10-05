@@ -29,10 +29,10 @@ jobs:
 
 ### Enable a status check
 
-You can set up a branch protection rule with the status check of `wait-for-workflows`.
+You can set up a branch ruleset with the status check of `wait-for-workflows`.
 For example,
 
-<img width="775" alt="image" src="https://github.com/int128/wait-for-workflows-action/assets/321266/7f3c5d09-c0e6-439e-9e20-fbf5feb58e71">
+<img width="755" alt="image" src="https://github.com/user-attachments/assets/de4fb62b-706c-4d0a-9c61-e0c2af2f378d">
 
 Therefore, a pull request status looks like:
 
