@@ -82,6 +82,22 @@ jobs:
             backend / *
 ```
 
+### Fail-fast
+
+By default, this action exits immediately if any workflow run is failing.
+You can wait for completion of all workflow runs by disabling fail-fast.
+
+```yaml
+jobs:
+  wait-for-workflows:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: int128/wait-for-workflows-action@v1
+        with:
+          fail-fast: false
+```
+
 ## Caveat
 
 ### Cost of GitHub-hosted runners :moneybag:
@@ -100,16 +116,17 @@ See [rate limiting](https://docs.github.com/en/rest/overview/resources-in-the-re
 
 ### Inputs
 
-| Name                        | Default                                              | Description                        |
-| --------------------------- | ---------------------------------------------------- | ---------------------------------- |
-| `filter-workflow-names`     | -                                                    | Filter workflows by name patterns  |
-| `exclude-workflow-names`    | -                                                    | Exclude workflows by name patterns |
-| `filter-workflow-events`    | `github.event_name`                                  | Filter workflows by events         |
-| `initial-delay-seconds`     | 10                                                   | Initial delay before polling       |
-| `period-seconds`            | 15                                                   | Polling period                     |
-| `page-size-of-check-suites` | 100                                                  | Page size of CheckSuites query     |
-| `sha`                       | `github.event.pull_request.head.sha` or `github.sha` | Commit SHA to wait for             |
-| `token`                     | `github.token`                                       | GitHub token                       |
+| Name                        | Default                                              | Description                                 |
+| --------------------------- | ---------------------------------------------------- | ------------------------------------------- |
+| `filter-workflow-names`     | -                                                    | Filter workflows by name patterns           |
+| `exclude-workflow-names`    | -                                                    | Exclude workflows by name patterns          |
+| `filter-workflow-events`    | `github.event_name`                                  | Filter workflows by events                  |
+| `fail-fast`                 | true                                                 | Exit immediately if any workflow is failing |
+| `initial-delay-seconds`     | 10                                                   | Initial delay before polling                |
+| `period-seconds`            | 15                                                   | Polling period                              |
+| `page-size-of-check-suites` | 100                                                  | Page size of CheckSuites query              |
+| `sha`                       | `github.event.pull_request.head.sha` or `github.sha` | Commit SHA to wait for                      |
+| `token`                     | `github.token`                                       | GitHub token                                |
 
 ### Outputs
 

@@ -61,6 +61,7 @@ describe('rollupChecks', () => {
       filterWorkflowEvents: [],
       excludeWorkflowNames: [],
       filterWorkflowNames: [],
+      failFast: true,
     })
     expect(rollup).toStrictEqual<Rollup>({
       conclusion: CheckConclusionState.Success,
@@ -88,6 +89,7 @@ describe('rollupChecks', () => {
       filterWorkflowEvents: ['pull_request_target'],
       excludeWorkflowNames: [],
       filterWorkflowNames: [],
+      failFast: true,
     })
     expect(rollup).toStrictEqual<Rollup>({
       conclusion: CheckConclusionState.Success,
@@ -108,6 +110,7 @@ describe('rollupChecks', () => {
       filterWorkflowEvents: [],
       excludeWorkflowNames: ['*-1'],
       filterWorkflowNames: [],
+      failFast: true,
     })
     expect(rollup).toStrictEqual<Rollup>({
       conclusion: CheckConclusionState.Success,
@@ -128,6 +131,7 @@ describe('rollupChecks', () => {
       filterWorkflowEvents: [],
       excludeWorkflowNames: [],
       filterWorkflowNames: ['*-2'],
+      failFast: true,
     })
     expect(rollup).toStrictEqual<Rollup>({
       conclusion: CheckConclusionState.Success,
@@ -148,6 +152,7 @@ describe('rollupChecks', () => {
       filterWorkflowEvents: [],
       excludeWorkflowNames: ['*'],
       filterWorkflowNames: [],
+      failFast: true,
     })
     expect(rollup).toStrictEqual<Rollup>({
       conclusion: CheckConclusionState.Success,
@@ -157,11 +162,6 @@ describe('rollupChecks', () => {
 })
 
 describe('rollupWorkflowRuns', () => {
-  it(`should return ${CheckConclusionState.Success} if no workflow run is given`, () => {
-    const state = rollupWorkflowRuns([])
-    expect(state).toBe(CheckConclusionState.Success)
-  })
-
   const runSuccess = {
     status: CheckStatusState.Completed,
     conclusion: CheckConclusionState.Success,
@@ -184,42 +184,72 @@ describe('rollupWorkflowRuns', () => {
     workflowName: 'test-in-progress',
   }
 
-  it.each([
-    { workflowRuns: [runSuccess] },
-    { workflowRuns: [runSuccess, runSuccess] },
-    { workflowRuns: [runSuccess, runSuccess, runSuccess] },
-  ])(
-    `should return ${CheckConclusionState.Success} if all workflow runs are ${CheckConclusionState.Success}`,
-    ({ workflowRuns }) => {
-      const state = rollupWorkflowRuns(workflowRuns)
+  describe.each([false, true])('fail-fast is %p', (failFast) => {
+    it(`should return ${CheckConclusionState.Success} if no workflow run is given`, () => {
+      const state = rollupWorkflowRuns([], { failFast })
       expect(state).toBe(CheckConclusionState.Success)
-    },
-  )
+    })
 
-  it.each([
-    { workflowRuns: [runFailure] },
-    { workflowRuns: [runSuccess, runFailure] },
-    { workflowRuns: [runFailure, runFailure] },
-    { workflowRuns: [runInProgress, runFailure] },
-    { workflowRuns: [runSuccess, runSuccess, runFailure] },
-    { workflowRuns: [runInProgress, runSuccess, runFailure] },
-  ])(
-    `should return ${CheckConclusionState.Failure} if any workflow run is ${CheckConclusionState.Failure}`,
-    ({ workflowRuns }) => {
-      const state = rollupWorkflowRuns(workflowRuns)
+    it.each([
+      { workflowRuns: [runSuccess] },
+      { workflowRuns: [runSuccess, runSuccess] },
+      { workflowRuns: [runSuccess, runSuccess, runSuccess] },
+    ])(`should return ${CheckConclusionState.Success} if all workflow runs are succeeded`, ({ workflowRuns }) => {
+      const state = rollupWorkflowRuns(workflowRuns, { failFast })
+      expect(state).toBe(CheckConclusionState.Success)
+    })
+  })
+
+  describe('fail-fast', () => {
+    const failFast = true
+
+    it.each([
+      { workflowRuns: [runFailure] },
+      { workflowRuns: [runFailure, runSuccess] },
+      { workflowRuns: [runFailure, runFailure] },
+      { workflowRuns: [runFailure, runInProgress] },
+      { workflowRuns: [runFailure, runInProgress, runSuccess] },
+    ])(`should return ${CheckConclusionState.Failure} if any workflow run is failed`, ({ workflowRuns }) => {
+      const state = rollupWorkflowRuns(workflowRuns, { failFast })
       expect(state).toBe(CheckConclusionState.Failure)
-    },
-  )
+    })
 
-  it.each([
-    { workflowRuns: [runInProgress] },
-    { workflowRuns: [runSuccess, runInProgress] },
-    { workflowRuns: [runInProgress, runInProgress] },
-    { workflowRuns: [runSuccess, runSuccess, runInProgress] },
-    { workflowRuns: [runInProgress, runSuccess, runInProgress] },
-    { workflowRuns: [runInProgress, runInProgress, runInProgress] },
-  ])(`should return ${null} if any workflow run is not ${CheckStatusState.Completed}`, ({ workflowRuns }) => {
-    const state = rollupWorkflowRuns(workflowRuns)
-    expect(state).toBe(null)
+    it.each([
+      { workflowRuns: [runInProgress] },
+      { workflowRuns: [runInProgress, runSuccess] },
+      { workflowRuns: [runInProgress, runInProgress] },
+      { workflowRuns: [runInProgress, runSuccess, runSuccess] },
+    ])(`should return null if any workflow run is not completed`, ({ workflowRuns }) => {
+      const state = rollupWorkflowRuns(workflowRuns, { failFast })
+      expect(state).toBe(null)
+    })
+  })
+
+  describe('non fail-fast', () => {
+    const failFast = false
+
+    it.each([
+      { workflowRuns: [runFailure] },
+      { workflowRuns: [runFailure, runSuccess] },
+      { workflowRuns: [runFailure, runFailure] },
+      { workflowRuns: [runFailure, runSuccess, runSuccess] },
+    ])(
+      `should return ${CheckConclusionState.Failure} if all workflow runs are completed and any workflow run is failed`,
+      ({ workflowRuns }) => {
+        const state = rollupWorkflowRuns(workflowRuns, { failFast })
+        expect(state).toBe(CheckConclusionState.Failure)
+      },
+    )
+
+    it.each([
+      { workflowRuns: [runInProgress] },
+      { workflowRuns: [runInProgress, runSuccess] },
+      { workflowRuns: [runInProgress, runFailure] },
+      { workflowRuns: [runInProgress, runInProgress] },
+      { workflowRuns: [runInProgress, runSuccess, runFailure] },
+    ])(`should return null if any workflow run is not completed`, ({ workflowRuns }) => {
+      const state = rollupWorkflowRuns(workflowRuns, { failFast })
+      expect(state).toBe(null)
+    })
   })
 })

@@ -7,6 +7,7 @@ const main = async (): Promise<void> => {
     filterWorkflowNames: core.getMultilineInput('filter-workflow-names'),
     excludeWorkflowNames: core.getMultilineInput('exclude-workflow-names'),
     filterWorkflowEvents: core.getMultilineInput('filter-workflow-events'),
+    failFast: core.getBooleanInput('fail-fast', { required: true }),
     initialDelaySeconds: Number.parseInt(core.getInput('initial-delay-seconds', { required: true })),
     periodSeconds: Number.parseInt(core.getInput('period-seconds', { required: true })),
     pageSizeOfCheckSuites: parseInt(core.getInput('page-size-of-check-suites', { required: true })),
