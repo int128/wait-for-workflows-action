@@ -14,7 +14,7 @@
     "@actions/github": "6.0.0",
     "@octokit/plugin-retry": "7.1.2",
     "@types/minimatch": "5.1.2",
-    "graphql": "16.9.0",
+    "graphql": "16.10.0",
     "minimatch": "10.0.1"
   },
   "devDependencies": {
