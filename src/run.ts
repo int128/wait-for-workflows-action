@@ -77,7 +77,10 @@ const writeWorkflowRunsLog = (rollup: Rollup) => {
 }
 
 const writeWorkflowRunsSummary = async (rollup: Rollup) => {
-  core.summary.addHeading(formatConclusion(rollup.conclusion))
+  core.summary.addHeading('wait-for-workflows summary', 2)
+  core.summary.addRaw('<p>Rollup conclusion: ')
+  core.summary.addRaw(formatConclusion(rollup.conclusion))
+  core.summary.addRaw('</p>')
   core.summary.addTable([
     [
       { data: 'Workflow name', header: true },
