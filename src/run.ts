@@ -65,19 +65,20 @@ const poll = async (inputs: Inputs): Promise<Rollup> => {
     if (rollup.conclusion !== null) {
       return rollup
     }
+    const completedCount = rollup.workflowRuns.filter((run) => run.status === CheckStatusState.Completed).length
+    core.startGroup(`Current workflow runs: ${completedCount} / ${rollup.workflowRuns.length} completed`)
     writeWorkflowRunsLog(rollup)
+    core.endGroup()
+
     core.info(`Waiting for ${inputs.periodSeconds}s`)
     await sleep(inputs.periodSeconds * 1000)
   }
 }
 
 const writeWorkflowRunsLog = (rollup: Rollup) => {
-  const completedCount = rollup.workflowRuns.filter((run) => run.status === CheckStatusState.Completed).length
-  core.startGroup(`Current workflow runs: ${completedCount} / ${rollup.workflowRuns.length} completed`)
   for (const run of rollup.workflowRuns) {
     core.info(`${run.status}: ${formatConclusion(run.conclusion)}: ${run.workflowName} (${run.event}): ${run.url}`)
   }
-  core.endGroup()
 }
 
 const writeWorkflowRunsSummary = async (rollup: Rollup) => {
