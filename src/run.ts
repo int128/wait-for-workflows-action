@@ -51,7 +51,7 @@ export const run = async (inputs: Inputs): Promise<void> => {
 const poll = async (inputs: Inputs): Promise<Rollup> => {
   const octokit = getOctokit(inputs.token)
   for (;;) {
-    core.startGroup(`debug: GraphQL`)
+    core.startGroup(`GraphQL request`)
     const checks = await getListChecksQuery(octokit, {
       owner: inputs.owner,
       name: inputs.repo,
