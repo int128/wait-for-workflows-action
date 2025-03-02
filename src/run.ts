@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
 import { Rollup, filterFailedWorkflowRuns, formatConclusion, rollupChecks } from './checks.js'
-import { CheckConclusionState } from './generated/graphql-types.js'
+import { CheckConclusionState, CheckStatusState } from './generated/graphql-types.js'
 import { getListChecksQuery } from './queries/listChecks.js'
 import { getOctokit } from './github.js'
 
@@ -51,6 +51,7 @@ export const run = async (inputs: Inputs): Promise<void> => {
 const poll = async (inputs: Inputs): Promise<Rollup> => {
   const octokit = getOctokit(inputs.token)
   for (;;) {
+    core.startGroup(`GraphQL request`)
     const checks = await getListChecksQuery(octokit, {
       owner: inputs.owner,
       name: inputs.repo,
@@ -58,14 +59,18 @@ const poll = async (inputs: Inputs): Promise<Rollup> => {
       appId: GITHUB_ACTIONS_APP_ID,
       firstCheckSuite: inputs.pageSizeOfCheckSuites,
     })
+    core.endGroup()
+
     const rollup = rollupChecks(checks, inputs)
     if (rollup.conclusion !== null) {
       return rollup
     }
-    core.startGroup(`Current workflow runs`)
+    const completedCount = rollup.workflowRuns.filter((run) => run.status === CheckStatusState.Completed).length
+    core.startGroup(`Current workflow runs: ${completedCount} / ${rollup.workflowRuns.length} completed`)
     writeWorkflowRunsLog(rollup)
     core.endGroup()
-    core.info(`Waiting for period ${inputs.periodSeconds}s`)
+
+    core.info(`Waiting for ${inputs.periodSeconds}s`)
     await sleep(inputs.periodSeconds * 1000)
   }
 }

@@ -48,16 +48,14 @@ type QueryFunction = (v: ListChecksQueryVariables) => Promise<ListChecksQuery>
 
 const createQueryFunction =
   (octokit: Octokit): QueryFunction =>
-  async (v: ListChecksQueryVariables): Promise<ListChecksQuery> =>
-    core.group(`ListChecksQuery`, async () => {
-      core.info(JSON.stringify(v))
-      const q: ListChecksQuery = await octokit.graphql(query, v)
-      assert(q.rateLimit != null)
-      core.info(`rateLimit.cost: ${q.rateLimit.cost}`)
-      core.info(`rateLimit.remaining: ${q.rateLimit.remaining}`)
-      core.debug(JSON.stringify(q, undefined, 2))
-      return q
-    })
+  async (v: ListChecksQueryVariables): Promise<ListChecksQuery> => {
+    core.info(`Calling ListChecksQuery(${JSON.stringify(v)})`)
+    const q: ListChecksQuery = await octokit.graphql(query, v)
+    assert(q.rateLimit != null)
+    core.info(`GitHub API rate limit is ${JSON.stringify(q.rateLimit)}`)
+    core.debug(JSON.stringify(q, undefined, 2))
+    return q
+  }
 
 export const getListChecksQuery = async (octokit: Octokit, v: ListChecksQueryVariables): Promise<ListChecksQuery> => {
   const fn = createQueryFunction(octokit)
