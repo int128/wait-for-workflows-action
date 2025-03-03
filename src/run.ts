@@ -5,7 +5,6 @@ import { CheckConclusionState, CheckStatusState } from './generated/graphql-type
 import {
   Rollup,
   RollupOptions,
-  determineRollupConclusion,
   filterCompletedWorkflowRuns,
   filterFailedWorkflowRuns,
   formatConclusion,
