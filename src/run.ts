@@ -1,29 +1,37 @@
 import * as core from '@actions/core'
-import { Rollup, filterFailedWorkflowRuns, formatConclusion, formatStatus, rollupChecks } from './checks.js'
-import { CheckConclusionState, CheckStatusState } from './generated/graphql-types.js'
 import { getListChecksQuery } from './queries/listChecks.js'
 import { getOctokit } from './github.js'
+import { CheckConclusionState } from './generated/graphql-types.js'
+import {
+  Rollup,
+  RollupOptions,
+  filterCompletedWorkflowRuns,
+  filterFailedWorkflowRuns,
+  formatConclusion,
+  formatStatus,
+  rollupChecks,
+} from './checks.js'
 
 // https://api.github.com/apps/github-actions
 const GITHUB_ACTIONS_APP_ID = 15368
 
 type Inputs = {
-  filterWorkflowEvents: string[]
-  excludeWorkflowNames: string[]
-  filterWorkflowNames: string[]
-  failFast: boolean
   initialDelaySeconds: number
   periodSeconds: number
   pageSizeOfCheckSuites: number
   sha: string
   owner: string
   repo: string
-  selfWorkflowName: string
   selfWorkflowURL: string
   token: string
+} & RollupOptions
+
+type Outputs = {
+  rollupState: string | null
+  failedWorkflowNames: string[]
 }
 
-export const run = async (inputs: Inputs): Promise<void> => {
+export const run = async (inputs: Inputs): Promise<Outputs> => {
   core.info(`Target commit: ${inputs.sha}`)
   core.info(`Filtering workflows by event: ${inputs.filterWorkflowEvents.join(', ')}`)
   core.info(`Excluding workflow name: ${inputs.excludeWorkflowNames.join(', ')}`)
@@ -31,21 +39,21 @@ export const run = async (inputs: Inputs): Promise<void> => {
   await sleep(inputs.initialDelaySeconds * 1000)
 
   const rollup = await poll(inputs)
-  await writeWorkflowRunsSummary(rollup)
-  core.setOutput('rollup-state', rollup.conclusion)
   core.info(`----`)
   core.info(formatConclusion(rollup.conclusion))
   core.info(`----`)
   writeWorkflowRunsLog(rollup)
   core.info(`----`)
+  await writeWorkflowRunsSummary(rollup)
+  core.info(`You can see the summary at ${inputs.selfWorkflowURL}`)
 
   if (rollup.conclusion === CheckConclusionState.Failure) {
-    const failedWorkflowRuns = filterFailedWorkflowRuns(rollup.workflowRuns)
-    const failedWorkflowNames = failedWorkflowRuns.map((run) => run.workflowName)
-    core.setOutput('failed-workflow-names', failedWorkflowNames.join('\n'))
-    throw new Error(`Some workflow has failed. See ${inputs.selfWorkflowURL} for the summary.`)
+    core.setFailed(`Some workflow has failed. See ${inputs.selfWorkflowURL} for the summary.`)
   }
-  core.info(`You can see the summary at ${inputs.selfWorkflowURL}`)
+  return {
+    rollupState: rollup.conclusion,
+    failedWorkflowNames: filterFailedWorkflowRuns(rollup.workflowRuns).map((run) => run.workflowName),
+  }
 }
 
 const poll = async (inputs: Inputs): Promise<Rollup> => {
@@ -65,11 +73,11 @@ const poll = async (inputs: Inputs): Promise<Rollup> => {
     if (rollup.conclusion !== null) {
       return rollup
     }
-    const completedCount = rollup.workflowRuns.filter((run) => run.status === CheckStatusState.Completed).length
+
+    const completedCount = filterCompletedWorkflowRuns(rollup.workflowRuns).length
     core.startGroup(`Current workflow runs: ${completedCount} / ${rollup.workflowRuns.length} completed`)
     writeWorkflowRunsLog(rollup)
     core.endGroup()
-
     core.info(`Waiting for ${inputs.periodSeconds}s`)
     await sleep(inputs.periodSeconds * 1000)
   }

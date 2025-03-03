@@ -18,7 +18,7 @@ type WorkflowRun = {
   workflowName: string
 }
 
-type RollupOptions = {
+export type RollupOptions = {
   failFast: boolean
   selfWorkflowName: string
   filterWorkflowEvents: string[]
@@ -76,7 +76,7 @@ export const rollupChecks = (checks: ListChecksQuery, options: RollupOptions): R
   sortByWorkflowName(workflowRuns)
 
   return {
-    conclusion: rollupWorkflowRuns(workflowRuns, options),
+    conclusion: rollupConclusion(workflowRuns, options),
     workflowRuns,
   }
 }
@@ -90,7 +90,7 @@ const isFailedConclusion = (conclusion: CheckConclusionState | null): boolean =>
   conclusion === CheckConclusionState.StartupFailure ||
   conclusion === CheckConclusionState.TimedOut
 
-export const rollupWorkflowRuns = (workflowRuns: WorkflowRun[], options: { failFast: boolean }): RollupConclusion => {
+export const rollupConclusion = (workflowRuns: WorkflowRun[], options: { failFast: boolean }): RollupConclusion => {
   if (workflowRuns.every((run) => run.status === CheckStatusState.Completed)) {
     if (workflowRuns.some((run) => isFailedConclusion(run.conclusion))) {
       return CheckConclusionState.Failure
@@ -127,3 +127,6 @@ export const formatStatus = (status: CheckStatusState): string => {
 
 export const filterFailedWorkflowRuns = (workflowRuns: WorkflowRun[]): WorkflowRun[] =>
   workflowRuns.filter((run) => isFailedConclusion(run.conclusion))
+
+export const filterCompletedWorkflowRuns = (workflowRuns: WorkflowRun[]): WorkflowRun[] =>
+  workflowRuns.filter((run) => run.status === CheckStatusState.Completed)
