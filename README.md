@@ -1,13 +1,10 @@
 # wait-for-workflows-action [![ts](https://github.com/int128/wait-for-workflows-action/actions/workflows/ts.yaml/badge.svg)](https://github.com/int128/wait-for-workflows-action/actions/workflows/ts.yaml)
 
-This is an action to wait for all workflow runs of the current SHA.
-
-## Purpose
+This is an action to wait for all workflow runs of the current commit.
 
 When any workflow has `paths` filter in GitHub Actions,
-we cannot enable the status check in a branch protection rule.
-
-This action aggregates the statuses of workflow runs.
+it is not possible to set a status check to a branch ruleset.
+This action aggregates the statuses of workflow runs for a status check.
 
 ## Getting Started
 
@@ -27,6 +24,8 @@ jobs:
       - uses: int128/wait-for-workflows-action@v1
 ```
 
+If any workflow run is failed, this action exits with failure.
+
 ### Enable a status check
 
 You can set up a branch ruleset with the status check of `wait-for-workflows`.
@@ -40,12 +39,11 @@ Therefore, a pull request status looks like:
 
 ## How it works
 
-This action fetches the workflow runs against the current commit SHA.
+This action watches the workflow runs against the current commit.
 It determines the rollup state as follows:
 
-- If any workflow run is failing, this action exits with an error.
-- If all workflow runs are completed, this action exits successfully.
-- Otherwise, check again.
+- If **any** workflow run is failed, this action exits with failure.
+- If **all** workflow runs are completed, this action exits successfully.
 
 It excludes the workflow of self to prevent an infinite loop.
 
@@ -98,7 +96,7 @@ jobs:
           fail-fast: false
 ```
 
-## Caveat
+## Caveats
 
 ### Cost of GitHub-hosted runners :moneybag:
 
