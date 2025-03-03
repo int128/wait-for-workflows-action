@@ -76,7 +76,7 @@ export const rollupChecks = (checks: ListChecksQuery, options: RollupOptions): R
   sortByWorkflowName(workflowRuns)
 
   return {
-    conclusion: rollupConclusion(workflowRuns, options),
+    conclusion: rollupWorkflowRuns(workflowRuns, options),
     workflowRuns,
   }
 }
@@ -90,7 +90,7 @@ const isFailedConclusion = (conclusion: CheckConclusionState | null): boolean =>
   conclusion === CheckConclusionState.StartupFailure ||
   conclusion === CheckConclusionState.TimedOut
 
-export const rollupConclusion = (workflowRuns: WorkflowRun[], options: { failFast: boolean }): RollupConclusion => {
+export const rollupWorkflowRuns = (workflowRuns: WorkflowRun[], options: { failFast: boolean }): RollupConclusion => {
   if (workflowRuns.every((run) => run.status === CheckStatusState.Completed)) {
     if (workflowRuns.some((run) => isFailedConclusion(run.conclusion))) {
       return CheckConclusionState.Failure
