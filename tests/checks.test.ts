@@ -1,4 +1,4 @@
-import { Rollup, rollupWorkflowRuns, rollupChecks } from '../src/checks.js'
+import { Rollup, determineRollupConclusion, determineRollupStatus, rollupChecks } from '../src/checks.js'
 import { ListChecksQuery } from '../src/generated/graphql.js'
 import { CheckConclusionState, CheckStatusState } from '../src/generated/graphql-types.js'
 
@@ -61,9 +61,9 @@ describe('rollupChecks', () => {
       filterWorkflowEvents: [],
       excludeWorkflowNames: [],
       filterWorkflowNames: [],
-      failFast: true,
     })
     expect(rollup).toStrictEqual<Rollup>({
+      status: CheckStatusState.Completed,
       conclusion: CheckConclusionState.Success,
       workflowRuns: [
         {
@@ -89,9 +89,9 @@ describe('rollupChecks', () => {
       filterWorkflowEvents: ['pull_request_target'],
       excludeWorkflowNames: [],
       filterWorkflowNames: [],
-      failFast: true,
     })
     expect(rollup).toStrictEqual<Rollup>({
+      status: CheckStatusState.Completed,
       conclusion: CheckConclusionState.Success,
       workflowRuns: [
         {
@@ -110,9 +110,9 @@ describe('rollupChecks', () => {
       filterWorkflowEvents: [],
       excludeWorkflowNames: ['*-1'],
       filterWorkflowNames: [],
-      failFast: true,
     })
     expect(rollup).toStrictEqual<Rollup>({
+      status: CheckStatusState.Completed,
       conclusion: CheckConclusionState.Success,
       workflowRuns: [
         {
@@ -131,9 +131,9 @@ describe('rollupChecks', () => {
       filterWorkflowEvents: [],
       excludeWorkflowNames: [],
       filterWorkflowNames: ['*-2'],
-      failFast: true,
     })
     expect(rollup).toStrictEqual<Rollup>({
+      status: CheckStatusState.Completed,
       conclusion: CheckConclusionState.Success,
       workflowRuns: [
         {
@@ -152,16 +152,16 @@ describe('rollupChecks', () => {
       filterWorkflowEvents: [],
       excludeWorkflowNames: ['*'],
       filterWorkflowNames: [],
-      failFast: true,
     })
     expect(rollup).toStrictEqual<Rollup>({
+      status: CheckStatusState.Completed,
       conclusion: CheckConclusionState.Success,
       workflowRuns: [],
     })
   })
 })
 
-describe('rollupWorkflowRuns', () => {
+describe('determineRollup functions', () => {
   const runSuccess = {
     status: CheckStatusState.Completed,
     conclusion: CheckConclusionState.Success,
@@ -183,11 +183,18 @@ describe('rollupWorkflowRuns', () => {
     url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/1',
     workflowName: 'test-in-progress',
   }
+  const runQueued = {
+    status: CheckStatusState.Queued,
+    conclusion: null,
+    event: 'pull_request',
+    url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/1',
+    workflowName: 'test-queued',
+  }
 
-  describe.each([false, true])('fail-fast is %p', (failFast) => {
+  describe('determineRollupConclusion', () => {
     it(`should return ${CheckConclusionState.Success} if no workflow run is given`, () => {
-      const state = rollupWorkflowRuns([], { failFast })
-      expect(state).toBe(CheckConclusionState.Success)
+      const conclusion = determineRollupConclusion([])
+      expect(conclusion).toBe(CheckConclusionState.Success)
     })
 
     it.each([
@@ -195,13 +202,9 @@ describe('rollupWorkflowRuns', () => {
       { workflowRuns: [runSuccess, runSuccess] },
       { workflowRuns: [runSuccess, runSuccess, runSuccess] },
     ])(`should return ${CheckConclusionState.Success} if all workflow runs are succeeded`, ({ workflowRuns }) => {
-      const state = rollupWorkflowRuns(workflowRuns, { failFast })
-      expect(state).toBe(CheckConclusionState.Success)
+      const conclusion = determineRollupConclusion(workflowRuns)
+      expect(conclusion).toBe(CheckConclusionState.Success)
     })
-  })
-
-  describe('fail-fast', () => {
-    const failFast = true
 
     it.each([
       { workflowRuns: [runFailure] },
@@ -210,8 +213,8 @@ describe('rollupWorkflowRuns', () => {
       { workflowRuns: [runFailure, runInProgress] },
       { workflowRuns: [runFailure, runInProgress, runSuccess] },
     ])(`should return ${CheckConclusionState.Failure} if any workflow run is failed`, ({ workflowRuns }) => {
-      const state = rollupWorkflowRuns(workflowRuns, { failFast })
-      expect(state).toBe(CheckConclusionState.Failure)
+      const conclusion = determineRollupConclusion(workflowRuns)
+      expect(conclusion).toBe(CheckConclusionState.Failure)
     })
 
     it.each([
@@ -220,36 +223,43 @@ describe('rollupWorkflowRuns', () => {
       { workflowRuns: [runInProgress, runInProgress] },
       { workflowRuns: [runInProgress, runSuccess, runSuccess] },
     ])(`should return null if any workflow run is not completed`, ({ workflowRuns }) => {
-      const state = rollupWorkflowRuns(workflowRuns, { failFast })
-      expect(state).toBe(null)
+      const conclusion = determineRollupConclusion(workflowRuns)
+      expect(conclusion).toBe(null)
     })
   })
 
-  describe('non fail-fast', () => {
-    const failFast = false
+  describe('determineRollupStatus', () => {
+    it(`should return ${CheckStatusState.Completed} if no workflow run is given`, () => {
+      const status = determineRollupStatus([])
+      expect(status).toBe(CheckStatusState.Completed)
+    })
 
     it.each([
+      { workflowRuns: [runSuccess] },
       { workflowRuns: [runFailure] },
-      { workflowRuns: [runFailure, runSuccess] },
-      { workflowRuns: [runFailure, runFailure] },
-      { workflowRuns: [runFailure, runSuccess, runSuccess] },
-    ])(
-      `should return ${CheckConclusionState.Failure} if all workflow runs are completed and any workflow run is failed`,
-      ({ workflowRuns }) => {
-        const state = rollupWorkflowRuns(workflowRuns, { failFast })
-        expect(state).toBe(CheckConclusionState.Failure)
-      },
-    )
+      { workflowRuns: [runSuccess, runFailure] },
+    ])(`should return ${CheckStatusState.Completed} if all workflow runs are completed`, ({ workflowRuns }) => {
+      const status = determineRollupStatus(workflowRuns)
+      expect(status).toBe(CheckStatusState.Completed)
+    })
 
     it.each([
       { workflowRuns: [runInProgress] },
-      { workflowRuns: [runInProgress, runSuccess] },
-      { workflowRuns: [runInProgress, runFailure] },
-      { workflowRuns: [runInProgress, runInProgress] },
-      { workflowRuns: [runInProgress, runSuccess, runFailure] },
-    ])(`should return null if any workflow run is not completed`, ({ workflowRuns }) => {
-      const state = rollupWorkflowRuns(workflowRuns, { failFast })
-      expect(state).toBe(null)
+      { workflowRuns: [runSuccess, runInProgress] },
+      { workflowRuns: [runFailure, runInProgress] },
+    ])(`should return null if any workflow run is in progress`, ({ workflowRuns }) => {
+      const status = determineRollupStatus(workflowRuns)
+      expect(status).toBe(null)
+    })
+
+    it.each([
+      { workflowRuns: [runQueued] },
+      { workflowRuns: [runInProgress, runQueued] },
+      { workflowRuns: [runSuccess, runQueued] },
+      { workflowRuns: [runFailure, runQueued] },
+    ])(`should return null if any workflow run is queued`, ({ workflowRuns }) => {
+      const status = determineRollupStatus(workflowRuns)
+      expect(status).toBe(null)
     })
   })
 })

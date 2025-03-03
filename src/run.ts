@@ -1,7 +1,7 @@
 import * as core from '@actions/core'
 import { getListChecksQuery } from './queries/listChecks.js'
 import { getOctokit } from './github.js'
-import { CheckConclusionState } from './generated/graphql-types.js'
+import { CheckConclusionState, CheckStatusState } from './generated/graphql-types.js'
 import {
   Rollup,
   RollupOptions,
@@ -16,6 +16,7 @@ import {
 const GITHUB_ACTIONS_APP_ID = 15368
 
 type Inputs = {
+  failFast: boolean
   initialDelaySeconds: number
   periodSeconds: number
   pageSizeOfCheckSuites: number
@@ -70,7 +71,10 @@ const poll = async (inputs: Inputs): Promise<Rollup> => {
     core.endGroup()
 
     const rollup = rollupChecks(checks, inputs)
-    if (rollup.conclusion !== null) {
+    if (rollup.status === CheckStatusState.Completed) {
+      return rollup
+    }
+    if (inputs.failFast && rollup.conclusion === CheckConclusionState.Failure) {
       return rollup
     }
 
