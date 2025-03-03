@@ -18,7 +18,7 @@ type WorkflowRun = {
   workflowName: string
 }
 
-type RollupOptions = {
+export type RollupOptions = {
   failFast: boolean
   selfWorkflowName: string
   filterWorkflowEvents: string[]
@@ -127,3 +127,6 @@ export const formatStatus = (status: CheckStatusState): string => {
 
 export const filterFailedWorkflowRuns = (workflowRuns: WorkflowRun[]): WorkflowRun[] =>
   workflowRuns.filter((run) => isFailedConclusion(run.conclusion))
+
+export const filterCompletedWorkflowRuns = (workflowRuns: WorkflowRun[]): WorkflowRun[] =>
+  workflowRuns.filter((run) => run.status === CheckStatusState.Completed)
