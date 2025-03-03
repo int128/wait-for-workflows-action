@@ -1,5 +1,5 @@
 import * as core from '@actions/core'
-import { Rollup, filterFailedWorkflowRuns, formatConclusion, rollupChecks } from './checks.js'
+import { Rollup, filterFailedWorkflowRuns, formatConclusion, formatStatus, rollupChecks } from './checks.js'
 import { CheckConclusionState, CheckStatusState } from './generated/graphql-types.js'
 import { getListChecksQuery } from './queries/listChecks.js'
 import { getOctokit } from './github.js'
@@ -77,7 +77,13 @@ const poll = async (inputs: Inputs): Promise<Rollup> => {
 
 const writeWorkflowRunsLog = (rollup: Rollup) => {
   for (const run of rollup.workflowRuns) {
-    core.info(`${run.status}: ${formatConclusion(run.conclusion)}: ${run.workflowName} (${run.event}): ${run.url}`)
+    const columns = [
+      formatStatus(run.status),
+      formatConclusion(run.conclusion),
+      `${run.workflowName} (${run.event})`,
+      run.url,
+    ]
+    core.info(columns.join(': '))
   }
 }
 
@@ -88,16 +94,14 @@ const writeWorkflowRunsSummary = async (rollup: Rollup) => {
   core.summary.addRaw('</p>')
   core.summary.addTable([
     [
-      { data: 'Workflow name', header: true },
-      { data: 'URL', header: true },
       { data: 'Status', header: true },
       { data: 'Conclusion', header: true },
+      { data: 'Workflow run', header: true },
     ],
     ...rollup.workflowRuns.map((run) => [
-      { data: `${run.workflowName} (${run.event})` },
-      { data: `<a href="${run.url}">${run.url}</a>` },
-      { data: run.status },
+      { data: formatStatus(run.status) },
       { data: formatConclusion(run.conclusion) },
+      { data: `<a href="${run.url}">${run.workflowName} (${run.event})</a>` },
     ]),
   ])
   await core.summary.write()

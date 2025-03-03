@@ -115,5 +115,15 @@ export const formatConclusion = (conclusion: CheckConclusionState | null): strin
   return conclusion ?? ''
 }
 
+export const formatStatus = (status: CheckStatusState): string => {
+  switch (status) {
+    case CheckStatusState.Queued:
+      return `🕒 ${status}`
+    case CheckStatusState.InProgress:
+      return `🚧 ${status}`
+  }
+  return status
+}
+
 export const filterFailedWorkflowRuns = (workflowRuns: WorkflowRun[]): WorkflowRun[] =>
   workflowRuns.filter((run) => isFailedConclusion(run.conclusion))
