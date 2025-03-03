@@ -4,9 +4,12 @@ import { ListChecksQuery } from './generated/graphql.js'
 import { CheckConclusionState, CheckStatusState } from './generated/graphql-types.js'
 
 export type Rollup = {
+  status: RollupStatus
   conclusion: RollupConclusion
   workflowRuns: WorkflowRun[]
 }
+
+type RollupStatus = CheckStatusState.Completed | null
 
 type RollupConclusion = CheckConclusionState.Success | CheckConclusionState.Failure | null
 
@@ -19,7 +22,6 @@ type WorkflowRun = {
 }
 
 export type RollupOptions = {
-  failFast: boolean
   selfWorkflowName: string
   filterWorkflowEvents: string[]
   excludeWorkflowNames: string[]
@@ -76,7 +78,8 @@ export const rollupChecks = (checks: ListChecksQuery, options: RollupOptions): R
   sortByWorkflowName(workflowRuns)
 
   return {
-    conclusion: rollupWorkflowRuns(workflowRuns, options),
+    status: determineRollupStatus(workflowRuns),
+    conclusion: determineRollupConclusion(workflowRuns),
     workflowRuns,
   }
 }
@@ -90,17 +93,19 @@ const isFailedConclusion = (conclusion: CheckConclusionState | null): boolean =>
   conclusion === CheckConclusionState.StartupFailure ||
   conclusion === CheckConclusionState.TimedOut
 
-export const rollupWorkflowRuns = (workflowRuns: WorkflowRun[], options: { failFast: boolean }): RollupConclusion => {
+export const determineRollupConclusion = (workflowRuns: WorkflowRun[]): RollupConclusion => {
+  if (workflowRuns.some((run) => isFailedConclusion(run.conclusion))) {
+    return CheckConclusionState.Failure
+  }
   if (workflowRuns.every((run) => run.status === CheckStatusState.Completed)) {
-    if (workflowRuns.some((run) => isFailedConclusion(run.conclusion))) {
-      return CheckConclusionState.Failure
-    }
     return CheckConclusionState.Success
   }
-  if (options.failFast) {
-    if (workflowRuns.some((run) => isFailedConclusion(run.conclusion))) {
-      return CheckConclusionState.Failure
-    }
+  return null
+}
+
+export const determineRollupStatus = (workflowRuns: WorkflowRun[]): RollupStatus => {
+  if (workflowRuns.every((run) => run.status === CheckStatusState.Completed)) {
+    return CheckStatusState.Completed
   }
   return null
 }
