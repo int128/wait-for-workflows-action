@@ -161,7 +161,7 @@ describe('rollupChecks', () => {
   })
 })
 
-describe('determineRollup', () => {
+describe('determineRollup functions', () => {
   const runSuccess = {
     status: CheckStatusState.Completed,
     conclusion: CheckConclusionState.Success,
