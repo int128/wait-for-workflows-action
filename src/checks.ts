@@ -73,11 +73,16 @@ export const rollupChecks = (checks: ListChecksQuery, options: RollupOptions): R
     return true
   })
 
+  sortByWorkflowName(workflowRuns)
+
   return {
     conclusion: rollupWorkflowRuns(workflowRuns, options),
     workflowRuns,
   }
 }
+
+const sortByWorkflowName = (workflowRuns: WorkflowRun[]) =>
+  workflowRuns.sort((a, b) => a.workflowName.localeCompare(b.workflowName))
 
 const isFailedConclusion = (conclusion: CheckConclusionState | null): boolean =>
   conclusion === CheckConclusionState.Failure ||
