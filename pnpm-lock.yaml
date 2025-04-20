@@ -15,7 +15,7 @@ importers:
         specifier: 1.1.1
         version: 1.1.1
       '@octokit/action':
-        specifier: ^7.0.2
+        specifier: 7.0.2
         version: 7.0.2
       '@octokit/plugin-retry':
         specifier: 7.2.1
@@ -49,7 +49,7 @@ importers:
         specifier: 15.26.0
         version: 15.26.0
       '@octokit/webhooks-types':
-        specifier: ^7.6.1
+        specifier: 7.6.1
         version: 7.6.1
       '@tsconfig/node20':
         specifier: 20.1.5
