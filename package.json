@@ -11,7 +11,7 @@
   "dependencies": {
     "@actions/core": "1.11.1",
     "@actions/exec": "1.1.1",
-    "@octokit/action": "^7.0.2",
+    "@octokit/action": "7.0.2",
     "@octokit/plugin-retry": "7.2.1",
     "@types/minimatch": "5.1.2",
     "graphql": "16.10.0",
@@ -24,7 +24,7 @@
     "@graphql-codegen/typescript": "4.1.6",
     "@graphql-codegen/typescript-operations": "4.6.0",
     "@octokit/graphql-schema": "15.26.0",
-    "@octokit/webhooks-types": "^7.6.1",
+    "@octokit/webhooks-types": "7.6.1",
     "@tsconfig/node20": "20.1.5",
     "@types/node": "20.17.30",
     "@vercel/ncc": "0.38.3",
