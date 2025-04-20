@@ -1,6 +1,7 @@
 import * as core from '@actions/core'
 import { getListChecksQuery } from './queries/listChecks.js'
-import { getOctokit } from './github.js'
+import { Context } from './github.js'
+import { Octokit } from '@octokit/action'
 import { CheckConclusionState, CheckStatusState } from './generated/graphql-types.js'
 import {
   Rollup,
@@ -21,10 +22,7 @@ type Inputs = {
   periodSeconds: number
   pageSizeOfCheckSuites: number
   sha: string
-  owner: string
-  repo: string
   selfWorkflowURL: string
-  token: string
 } & RollupOptions
 
 type Outputs = {
@@ -32,14 +30,14 @@ type Outputs = {
   failedWorkflowNames: string[]
 }
 
-export const run = async (inputs: Inputs): Promise<Outputs> => {
+export const run = async (inputs: Inputs, octokit: Octokit, context: Context): Promise<Outputs> => {
   core.info(`Target commit: ${inputs.sha}`)
   core.info(`Filtering workflows by event: ${inputs.filterWorkflowEvents.join(', ')}`)
   core.info(`Excluding workflow name: ${inputs.excludeWorkflowNames.join(', ')}`)
   core.info(`Waiting for initial delay ${inputs.initialDelaySeconds}s`)
   await sleep(inputs.initialDelaySeconds * 1000)
 
-  const rollup = await poll(inputs)
+  const rollup = await poll(inputs, octokit, context)
   core.info(`----`)
   core.info(formatConclusion(rollup.conclusion))
   core.info(`----`)
@@ -57,13 +55,12 @@ export const run = async (inputs: Inputs): Promise<Outputs> => {
   }
 }
 
-const poll = async (inputs: Inputs): Promise<Rollup> => {
-  const octokit = getOctokit(inputs.token)
+const poll = async (inputs: Inputs, octokit: Octokit, context: Context): Promise<Rollup> => {
   for (;;) {
     core.startGroup(`GraphQL request`)
     const checks = await getListChecksQuery(octokit, {
-      owner: inputs.owner,
-      name: inputs.repo,
+      owner: context.repo.owner,
+      name: context.repo.repo,
       oid: inputs.sha,
       appId: GITHUB_ACTIONS_APP_ID,
       firstCheckSuite: inputs.pageSizeOfCheckSuites,
