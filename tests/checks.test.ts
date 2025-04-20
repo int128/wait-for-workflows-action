@@ -1,3 +1,6 @@
+import { describe } from 'vitest'
+import { it } from 'vitest'
+import { expect } from 'vitest'
 import { Rollup, determineRollupConclusion, determineRollupStatus, rollupChecks } from '../src/checks.js'
 import { ListChecksQuery } from '../src/generated/graphql.js'
 import { CheckConclusionState, CheckStatusState } from '../src/generated/graphql-types.js'
