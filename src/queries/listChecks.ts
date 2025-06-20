@@ -51,7 +51,7 @@ const createQueryFunction =
   async (v: ListChecksQueryVariables): Promise<ListChecksQuery> => {
     core.info(`Calling ListChecksQuery(${JSON.stringify(v)})`)
     const q: ListChecksQuery = await octokit.graphql(query, v)
-    assert(q.rateLimit != null)
+    assert(q.rateLimit != null, `rateLimit must not be null`)
     core.info(`GitHub API rate limit is ${JSON.stringify(q.rateLimit)}`)
     core.debug(JSON.stringify(q, undefined, 2))
     return q
@@ -70,14 +70,14 @@ const paginateCheckSuites = async (
   v: ListChecksQueryVariables,
   cumulativeCheckSuites: CheckSuites,
 ): Promise<void> => {
-  assert(cumulativeCheckSuites.nodes != null)
+  assert(cumulativeCheckSuites.nodes != null, `cumulativeCheckSuites.nodes must not be null`)
   while (cumulativeCheckSuites.pageInfo.hasNextPage) {
     const nextQuery = await fn({
       ...v,
       afterCheckSuite: cumulativeCheckSuites.pageInfo.endCursor,
     })
     const nextCheckSuites = getCheckSuites(nextQuery)
-    assert(nextCheckSuites.nodes != null)
+    assert(nextCheckSuites.nodes != null, `nextCheckSuites.nodes must not be null`)
     cumulativeCheckSuites.nodes.push(...nextCheckSuites.nodes)
     cumulativeCheckSuites.totalCount = nextCheckSuites.totalCount
     cumulativeCheckSuites.pageInfo = nextCheckSuites.pageInfo
@@ -88,9 +88,9 @@ const paginateCheckSuites = async (
 type CheckSuites = ReturnType<typeof getCheckSuites>
 
 const getCheckSuites = (q: ListChecksQuery) => {
-  assert(q.repository != null)
-  assert(q.repository.object != null)
+  assert(q.repository != null, `repository must not be null`)
+  assert(q.repository.object != null, `repository.object must not be null`)
   assert.strictEqual(q.repository.object.__typename, 'Commit')
-  assert(q.repository.object.checkSuites != null)
+  assert(q.repository.object.checkSuites != null, `repository.object.checkSuites must not be null`)
   return q.repository.object.checkSuites
 }

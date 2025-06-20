@@ -29,15 +29,15 @@ export type RollupOptions = {
 }
 
 export const rollupChecks = (checks: ListChecksQuery, options: RollupOptions): Rollup => {
-  assert(checks.repository != null)
-  assert(checks.repository.object != null)
+  assert(checks.repository != null, `repository must not be null`)
+  assert(checks.repository.object != null, `repository.object must not be null`)
   assert.strictEqual(checks.repository.object.__typename, 'Commit')
-  assert(checks.repository.object.checkSuites != null)
-  assert(checks.repository.object.checkSuites.nodes != null)
+  assert(checks.repository.object.checkSuites != null, `repository.object.checkSuites must not be null`)
+  assert(checks.repository.object.checkSuites.nodes != null, `repository.object.checkSuites.nodes must not be null`)
   const rawWorkflowRuns = checks.repository.object.checkSuites.nodes.map<WorkflowRun>((node) => {
-    assert(node != null)
-    assert(node.conclusion !== undefined)
-    assert(node.workflowRun != null)
+    assert(node != null, `checkSuite.node must not be null`)
+    assert(node.conclusion !== undefined, `checkSuite.node.conclusion must not be undefined`)
+    assert(node.workflowRun != null, `checkSuite.node.workflowRun must not be null`)
     return {
       status: node.status,
       conclusion: node.conclusion,
