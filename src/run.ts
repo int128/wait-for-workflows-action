@@ -41,13 +41,12 @@ export const run = async (inputs: Inputs, octokit: Octokit, context: Context): P
   core.info(`----`)
   core.info(formatConclusion(rollup.conclusion))
   core.info(`----`)
-  writeWorkflowRunsLog(rollup)
-  core.info(`----`)
   await writeWorkflowRunsSummary(rollup)
-  core.info(`You can see the summary at ${inputs.selfWorkflowURL}`)
+  core.info(`For details, see ${inputs.selfWorkflowURL}`)
+  core.info(`----`)
 
   if (rollup.conclusion === CheckConclusionState.Failure) {
-    core.setFailed(`Some workflow has failed. See ${inputs.selfWorkflowURL} for the summary.`)
+    core.setFailed(`Some workflow has failed. For details, see ${inputs.selfWorkflowURL}`)
   }
   return {
     rollupState: rollup.conclusion,
@@ -68,17 +67,17 @@ const poll = async (inputs: Inputs, octokit: Octokit, context: Context): Promise
     core.endGroup()
 
     const rollup = rollupChecks(checks, inputs)
+    const completedCount = filterCompletedWorkflowRuns(rollup.workflowRuns).length
+    core.startGroup(`Current workflow runs: ${completedCount} / ${rollup.workflowRuns.length} completed`)
+    writeWorkflowRunsLog(rollup)
+    core.endGroup()
+
     if (rollup.status === CheckStatusState.Completed) {
       return rollup
     }
     if (inputs.failFast && rollup.conclusion === CheckConclusionState.Failure) {
       return rollup
     }
-
-    const completedCount = filterCompletedWorkflowRuns(rollup.workflowRuns).length
-    core.startGroup(`Current workflow runs: ${completedCount} / ${rollup.workflowRuns.length} completed`)
-    writeWorkflowRunsLog(rollup)
-    core.endGroup()
     core.info(`Waiting for ${inputs.periodSeconds}s`)
     await sleep(inputs.periodSeconds * 1000)
   }
@@ -103,14 +102,14 @@ const writeWorkflowRunsSummary = async (rollup: Rollup) => {
   core.summary.addRaw('</p>')
   core.summary.addTable([
     [
+      { data: 'Workflow run', header: true },
       { data: 'Status', header: true },
       { data: 'Conclusion', header: true },
-      { data: 'Workflow run', header: true },
     ],
     ...rollup.workflowRuns.map((run) => [
+      { data: `<a href="${run.url}">${run.workflowName} (${run.event})</a>` },
       { data: formatStatus(run.status) },
       { data: formatConclusion(run.conclusion) },
-      { data: `<a href="${run.url}">${run.workflowName} (${run.event})</a>` },
     ]),
   ])
   await core.summary.write()
