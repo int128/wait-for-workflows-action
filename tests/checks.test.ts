@@ -1,7 +1,13 @@
 import { describe } from 'vitest'
 import { it } from 'vitest'
 import { expect } from 'vitest'
-import { Rollup, determineRollupConclusion, determineRollupStatus, rollupChecks } from '../src/checks.js'
+import {
+  Rollup,
+  dedupeByWorkflowNameAndEvent,
+  determineRollupConclusion,
+  determineRollupStatus,
+  rollupChecks,
+} from '../src/checks.js'
 import { ListChecksQuery } from '../src/generated/graphql.js'
 import { CheckConclusionState, CheckStatusState } from '../src/generated/graphql-types.js'
 
@@ -161,6 +167,37 @@ describe('rollupChecks', () => {
       conclusion: CheckConclusionState.Success,
       workflowRuns: [],
     })
+  })
+})
+
+describe('dedupeByWorkflowNameAndEvent', () => {
+  it('deduplicates workflow runs by name and event', () => {
+    const runs = [
+      {
+        status: CheckStatusState.Completed,
+        conclusion: CheckConclusionState.Success,
+        event: 'pull_request',
+        url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/1',
+        workflowName: 'test-success',
+      },
+      {
+        status: CheckStatusState.Completed,
+        conclusion: CheckConclusionState.Success,
+        event: 'pull_request',
+        url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/2',
+        workflowName: 'test-success',
+      },
+    ]
+    const deduplicated = dedupeByWorkflowNameAndEvent(runs)
+    expect(deduplicated).toStrictEqual([
+      {
+        status: CheckStatusState.Completed,
+        conclusion: CheckConclusionState.Success,
+        event: 'pull_request',
+        url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/2',
+        workflowName: 'test-success',
+      },
+    ])
   })
 })
 
