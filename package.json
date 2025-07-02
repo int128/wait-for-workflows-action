@@ -13,7 +13,7 @@
     "@actions/exec": "1.1.1",
     "@octokit/action": "8.0.2",
     "@octokit/plugin-retry": "8.0.1",
-    "@types/minimatch": "5.1.2",
+    "@types/minimatch": "6.0.0",
     "graphql": "16.11.0",
     "minimatch": "10.0.3"
   },
