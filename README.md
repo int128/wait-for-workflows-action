@@ -49,8 +49,8 @@ It excludes the workflow of self to prevent an infinite loop.
 
 It filters the workflows by the current event such as `push` or `pull_request`.
 
-It filters the latest workflow runs by the workflow name and event name.
-If there are multiple workflow runs of the same name and event, it waits for the latest one only.
+It filters the latest workflow runs by the workflow name and event.
+When there are multiple workflow runs with the same name and event, it keeps only the latest one.
 
 ### Exclude or filter workflows by name patterns
 
