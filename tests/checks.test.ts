@@ -3,7 +3,7 @@ import { it } from 'vitest'
 import { expect } from 'vitest'
 import {
   Rollup,
-  dedupeByWorkflowNameAndEvent,
+  filterLatestWorkflowRuns,
   determineRollupConclusion,
   determineRollupStatus,
   rollupChecks,
@@ -170,8 +170,8 @@ describe('rollupChecks', () => {
   })
 })
 
-describe('dedupeByWorkflowNameAndEvent', () => {
-  it('deduplicates workflow runs by name and event', () => {
+describe('filterLatestWorkflowRuns', () => {
+  it('returns the latest workflow runs by name and event', () => {
     const runs = [
       {
         status: CheckStatusState.Completed,
@@ -182,17 +182,17 @@ describe('dedupeByWorkflowNameAndEvent', () => {
       },
       {
         status: CheckStatusState.Completed,
-        conclusion: CheckConclusionState.Success,
+        conclusion: CheckConclusionState.Skipped,
         event: 'pull_request',
         url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/2',
         workflowName: 'test-success',
       },
     ]
-    const deduplicated = dedupeByWorkflowNameAndEvent(runs)
-    expect(deduplicated).toStrictEqual([
+    const latestWorkflowRuns = filterLatestWorkflowRuns(runs)
+    expect(latestWorkflowRuns).toStrictEqual([
       {
         status: CheckStatusState.Completed,
-        conclusion: CheckConclusionState.Success,
+        conclusion: CheckConclusionState.Skipped,
         event: 'pull_request',
         url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/2',
         workflowName: 'test-success',
