@@ -51,9 +51,11 @@ export const rollupChecks = (checks: ListChecksQuery, options: RollupOptions): R
     })
   }
 
+  const latestWorkflowRuns = filterLatestWorkflowRuns(rawWorkflowRuns)
+
   const excludeWorkflowNameMatchers = options.excludeWorkflowNames.map((pattern) => minimatch.filter(pattern))
   const filterWorkflowNameMatchers = options.filterWorkflowNames.map((pattern) => minimatch.filter(pattern))
-  const workflowRuns = rawWorkflowRuns.filter((workflowRun) => {
+  const workflowRuns = latestWorkflowRuns.filter((workflowRun) => {
     // Exclude self to prevent the infinite loop
     if (workflowRun.workflowName === options.selfWorkflowName) {
       return false
@@ -86,6 +88,24 @@ export const rollupChecks = (checks: ListChecksQuery, options: RollupOptions): R
     conclusion: determineRollupConclusion(workflowRuns),
     workflowRuns,
   }
+}
+
+export const filterLatestWorkflowRuns = (workflowRuns: WorkflowRun[]): WorkflowRun[] => {
+  const latestWorkflowRuns = new Map<string, WorkflowRun>()
+  for (const workflowRun of workflowRuns) {
+    const key = `${workflowRun.workflowName}--${workflowRun.event}`
+    if (!latestWorkflowRuns.has(key)) {
+      latestWorkflowRuns.set(key, workflowRun)
+    } else {
+      // Keep the latest workflow run based on URL (assuming URL contains a run ID)
+      const existingWorkflowRun = latestWorkflowRuns.get(key)
+      assert(existingWorkflowRun != null)
+      if (workflowRun.url.localeCompare(existingWorkflowRun.url) > 0) {
+        latestWorkflowRuns.set(key, workflowRun)
+      }
+    }
+  }
+  return [...latestWorkflowRuns.values()]
 }
 
 const sortByWorkflowName = (workflowRuns: WorkflowRun[]) =>
