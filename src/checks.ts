@@ -34,18 +34,22 @@ export const rollupChecks = (checks: ListChecksQuery, options: RollupOptions): R
   assert.strictEqual(checks.repository.object.__typename, 'Commit')
   assert(checks.repository.object.checkSuites != null, `repository.object.checkSuites must not be null`)
   assert(checks.repository.object.checkSuites.nodes != null, `repository.object.checkSuites.nodes must not be null`)
-  const rawWorkflowRuns = checks.repository.object.checkSuites.nodes.map<WorkflowRun>((node) => {
+
+  const rawWorkflowRuns: WorkflowRun[] = []
+  for (const node of checks.repository.object.checkSuites.nodes) {
     assert(node != null, `checkSuite.node must not be null`)
     assert(node.conclusion !== undefined, `checkSuite.node.conclusion must not be undefined`)
-    assert(node.workflowRun != null, `checkSuite.node.workflowRun must not be null`)
-    return {
+    if (node.workflowRun == null) {
+      continue
+    }
+    rawWorkflowRuns.push({
       status: node.status,
       conclusion: node.conclusion,
       event: node.workflowRun.event,
       url: node.workflowRun.url,
       workflowName: node.workflowRun.workflow.name,
-    }
-  })
+    })
+  }
 
   const dedupedWorkflowRuns = dedupeByWorkflowNameAndEvent(rawWorkflowRuns)
 
