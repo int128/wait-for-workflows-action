@@ -1,17 +1,17 @@
 import * as core from '@actions/core'
-import { getListChecksQuery } from './queries/listChecks.js'
-import { Context } from './github.js'
-import { Octokit } from '@octokit/action'
-import { CheckConclusionState, CheckStatusState } from './generated/graphql-types.js'
+import type { Octokit } from '@octokit/action'
 import {
-  Rollup,
-  RollupOptions,
   filterCompletedWorkflowRuns,
   filterFailedWorkflowRuns,
   formatConclusion,
   formatStatus,
+  type Rollup,
+  type RollupOptions,
   rollupChecks,
 } from './checks.js'
+import { CheckConclusionState, CheckStatusState } from './generated/graphql-types.js'
+import type { Context } from './github.js'
+import { getListChecksQuery } from './queries/listChecks.js'
 
 // https://api.github.com/apps/github-actions
 const GITHUB_ACTIONS_APP_ID = 15368
