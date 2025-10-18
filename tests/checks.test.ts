@@ -1,14 +1,12 @@
-import { describe } from 'vitest'
-import { it } from 'vitest'
-import { expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import {
-  Rollup,
-  filterLatestWorkflowRuns,
   determineRollupConclusion,
   determineRollupStatus,
+  filterLatestWorkflowRuns,
+  type Rollup,
   rollupChecks,
 } from '../src/checks.js'
-import { ListChecksQuery } from '../src/generated/graphql.js'
+import type { ListChecksQuery } from '../src/generated/graphql.js'
 import { CheckConclusionState, CheckStatusState } from '../src/generated/graphql-types.js'
 
 describe('rollupChecks', () => {

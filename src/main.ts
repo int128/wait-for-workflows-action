@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
-import { run } from './run.js'
 import { getContext, getOctokit } from './github.js'
+import { run } from './run.js'
 
 const main = async (): Promise<void> => {
   const context = await getContext()
@@ -10,9 +10,9 @@ const main = async (): Promise<void> => {
       excludeWorkflowNames: core.getMultilineInput('exclude-workflow-names'),
       filterWorkflowEvents: core.getMultilineInput('filter-workflow-events'),
       failFast: core.getBooleanInput('fail-fast', { required: true }),
-      initialDelaySeconds: Number.parseInt(core.getInput('initial-delay-seconds', { required: true })),
-      periodSeconds: Number.parseInt(core.getInput('period-seconds', { required: true })),
-      pageSizeOfCheckSuites: parseInt(core.getInput('page-size-of-check-suites', { required: true })),
+      initialDelaySeconds: Number.parseInt(core.getInput('initial-delay-seconds', { required: true }), 10),
+      periodSeconds: Number.parseInt(core.getInput('period-seconds', { required: true }), 10),
+      pageSizeOfCheckSuites: parseInt(core.getInput('page-size-of-check-suites', { required: true }), 10),
       sha: core.getInput('sha', { required: true }),
       selfWorkflowName: context.workflow,
       selfWorkflowURL: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
