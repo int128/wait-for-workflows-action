@@ -99,6 +99,24 @@ jobs:
           fail-fast: false
 ```
 
+### Filter workflow runs by pull_request types
+
+When this action is called on `pull_request` event, it evaluates the workflow runs of all pull request types.
+It may cause unexpected failure, for example, the `labeled` type is triggered after `opened` type.
+
+You can set `exact-match-pull-request-types` to evaluate only the workflow runs of the same pull request type as the current event.
+
+```yaml
+jobs:
+  wait-for-workflows:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: int128/wait-for-workflows-action@v1
+        with:
+          exact-match-pull-request-types: true
+```
+
 ## Caveats
 
 ### Cost of GitHub-hosted runners :moneybag:

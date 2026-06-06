@@ -19,6 +19,7 @@ type WorkflowRun = {
   event: string
   url: string
   workflowName: string
+  workflowFilePath: string | undefined
 }
 
 export type RollupOptions = {
@@ -26,6 +27,7 @@ export type RollupOptions = {
   filterWorkflowEvents: string[]
   excludeWorkflowNames: string[]
   filterWorkflowNames: string[]
+  possiblyTriggeredWorkflowFilePaths: string[]
 }
 
 export const rollupChecks = (checks: ListChecksQuery, options: RollupOptions): Rollup => {
@@ -48,6 +50,7 @@ export const rollupChecks = (checks: ListChecksQuery, options: RollupOptions): R
       event: node.workflowRun.event,
       url: node.workflowRun.url,
       workflowName: node.workflowRun.workflow.name,
+      workflowFilePath: node.workflowRun.file?.path,
     })
   }
 
@@ -75,6 +78,11 @@ export const rollupChecks = (checks: ListChecksQuery, options: RollupOptions): R
     // Filter workflows by names
     if (filterWorkflowNameMatchers.length > 0) {
       if (!filterWorkflowNameMatchers.some((match) => match(workflowRun.workflowName))) {
+        return false
+      }
+    }
+    if (options.possiblyTriggeredWorkflowFilePaths.length > 0 && workflowRun.workflowFilePath != null) {
+      if (!options.possiblyTriggeredWorkflowFilePaths.includes(workflowRun.workflowFilePath)) {
         return false
       }
     }

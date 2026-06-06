@@ -13,7 +13,9 @@
     "@octokit/action": "8.0.4",
     "@octokit/plugin-retry": "8.1.0",
     "graphql": "16.14.0",
-    "minimatch": "10.2.5"
+    "js-yaml": "4.2.0",
+    "minimatch": "10.2.5",
+    "zod": "4.4.3"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.16",
@@ -24,6 +26,7 @@
     "@octokit/graphql-schema": "15.26.1",
     "@octokit/webhooks-types": "7.6.1",
     "@tsconfig/node24": "24.0.4",
+    "@types/js-yaml": "4.0.9",
     "@types/node": "24.12.4",
     "@vercel/ncc": "0.38.4",
     "pnpm": "11.5.0",

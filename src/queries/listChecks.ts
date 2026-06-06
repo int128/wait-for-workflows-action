@@ -33,6 +33,9 @@ const query = /* GraphQL */ `
                 workflow {
                   name
                 }
+                file {
+                  path
+                }
               }
               status
               conclusion

@@ -12,6 +12,10 @@ inputs:
     description: Filter workflows by events (multiline)
     required: false
     default: ${{ github.event_name }}
+  exact-match-pull-request-types:
+    description: Whether to match pull request types exactly
+    required: true
+    default: 'false'
   fail-fast:
     description: Exit immediately if any workflow is failing
     required: true

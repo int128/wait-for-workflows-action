@@ -12,6 +12,7 @@ import {
 import { CheckConclusionState, CheckStatusState } from './generated/graphql-types.js'
 import type { Context } from './github.js'
 import { getListChecksQuery } from './queries/listChecks.js'
+import { getPossiblyTriggeredWorkflowFilePaths } from './workflows.js'
 
 // https://api.github.com/apps/github-actions
 const GITHUB_ACTIONS_APP_ID = 15368
@@ -23,7 +24,11 @@ type Inputs = {
   pageSizeOfCheckSuites: number
   sha: string
   selfWorkflowURL: string
-} & RollupOptions
+  selfWorkflowName: string
+  filterWorkflowEvents: string[]
+  excludeWorkflowNames: string[]
+  filterWorkflowNames: string[]
+}
 
 type Outputs = {
   rollupState: string | null
@@ -55,6 +60,7 @@ export const run = async (inputs: Inputs, octokit: Octokit, context: Context): P
 }
 
 const poll = async (inputs: Inputs, octokit: Octokit, context: Context): Promise<Rollup> => {
+  const possiblyTriggeredWorkflowFilePaths = await getPossiblyTriggeredWorkflowFilePaths(context)
   for (;;) {
     core.startGroup(`GraphQL request`)
     const checks = await getListChecksQuery(octokit, {
@@ -66,7 +72,13 @@ const poll = async (inputs: Inputs, octokit: Octokit, context: Context): Promise
     })
     core.endGroup()
 
-    const rollup = rollupChecks(checks, inputs)
+    const rollup = rollupChecks(checks, {
+      selfWorkflowName: inputs.selfWorkflowName,
+      filterWorkflowEvents: inputs.filterWorkflowEvents,
+      excludeWorkflowNames: inputs.excludeWorkflowNames,
+      filterWorkflowNames: inputs.filterWorkflowNames,
+      possiblyTriggeredWorkflowFilePaths,
+    })
     const completedCount = filterCompletedWorkflowRuns(rollup.workflowRuns).length
     core.startGroup(`Current workflow runs: ${completedCount} / ${rollup.workflowRuns.length} completed`)
     writeWorkflowRunsLog(rollup)
