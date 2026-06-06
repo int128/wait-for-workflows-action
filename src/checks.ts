@@ -27,7 +27,7 @@ export type RollupOptions = {
   filterWorkflowEvents: string[]
   excludeWorkflowNames: string[]
   filterWorkflowNames: string[]
-  possiblyTriggeredWorkflowFilePaths: string[]
+  filterWorkflowFilePaths: string[]
 }
 
 export const rollupChecks = (checks: ListChecksQuery, options: RollupOptions): Rollup => {
@@ -81,8 +81,8 @@ export const rollupChecks = (checks: ListChecksQuery, options: RollupOptions): R
         return false
       }
     }
-    if (options.possiblyTriggeredWorkflowFilePaths.length > 0 && workflowRun.workflowFilePath != null) {
-      if (!options.possiblyTriggeredWorkflowFilePaths.includes(workflowRun.workflowFilePath)) {
+    if (options.filterWorkflowFilePaths.length > 0 && workflowRun.workflowFilePath != null) {
+      if (!options.filterWorkflowFilePaths.includes(workflowRun.workflowFilePath)) {
         return false
       }
     }

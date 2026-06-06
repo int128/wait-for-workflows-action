@@ -99,12 +99,12 @@ jobs:
           fail-fast: false
 ```
 
-### Filter workflow runs by pull_request types
+### Filter workflow runs by event type
 
-When this action is called on `pull_request` event, it evaluates the workflow runs of all pull request types.
+When this action is called on `pull_request` event, it evaluates the workflow runs of all types.
 It may cause unexpected failure, for example, the `labeled` type is triggered after `opened` type.
 
-You can set `exact-match-pull-request-types` to evaluate only the workflow runs of the same pull request type as the current event.
+You can set `filter-event-type` to filter workflow runs by the current event type.
 
 ```yaml
 jobs:
@@ -114,7 +114,7 @@ jobs:
     steps:
       - uses: int128/wait-for-workflows-action@v1
         with:
-          exact-match-pull-request-types: true
+          filter-event-type: true
 ```
 
 ## Caveats

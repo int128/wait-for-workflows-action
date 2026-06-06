@@ -37,27 +37,21 @@ const parseWorkflowFiles = async function* (cwd: string): AsyncGenerator<Workflo
   }
 }
 
-const getPossiblePullRequestEventTypes = (workflow: Workflow): string[] => {
-  if (workflow.on.pull_request === undefined) {
-    return []
-  }
-  // https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#pull_request
-  return workflow.on.pull_request?.types ?? ['opened', 'synchronize', 'reopened']
-}
-
-const getPossiblyTriggeredWorkflowFilePathsForPullRequestEvent = async function* (action: string, workspace: string) {
+const getWorkflowFilePathsForPullRequestEventType = async function* (eventType: string, workspace: string) {
   for await (const workflowFile of parseWorkflowFiles(workspace)) {
-    if (getPossiblePullRequestEventTypes(workflowFile.workflow).includes(action)) {
-      yield workflowFile.path
+    if (workflowFile.workflow.on.pull_request !== undefined) {
+      // https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#pull_request
+      const workflowEventTypes = workflowFile.workflow.on.pull_request?.types ?? ['opened', 'synchronize', 'reopened']
+      if (workflowEventTypes.includes(eventType)) {
+        yield workflowFile.path
+      }
     }
   }
 }
 
-export const getPossiblyTriggeredWorkflowFilePaths = async (context: Context): Promise<string[]> => {
+export const getWorkflowFilePathsForCurrentEventType = async (context: Context): Promise<string[]> => {
   if (context.eventName === 'pull_request' && 'action' in context.payload) {
-    return Array.fromAsync(
-      getPossiblyTriggeredWorkflowFilePathsForPullRequestEvent(context.payload.action, context.workspace),
-    )
+    return Array.fromAsync(getWorkflowFilePathsForPullRequestEventType(context.payload.action, context.workspace))
   }
   return []
 }

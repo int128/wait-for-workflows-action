@@ -68,7 +68,7 @@ describe('rollupChecks', () => {
       filterWorkflowEvents: [],
       excludeWorkflowNames: [],
       filterWorkflowNames: [],
-      possiblyTriggeredWorkflowFilePaths: [],
+      filterWorkflowFilePaths: [],
     })
     expect(rollup).toStrictEqual<Rollup>({
       status: CheckStatusState.Completed,
@@ -99,7 +99,7 @@ describe('rollupChecks', () => {
       filterWorkflowEvents: ['pull_request_target'],
       excludeWorkflowNames: [],
       filterWorkflowNames: [],
-      possiblyTriggeredWorkflowFilePaths: [],
+      filterWorkflowFilePaths: [],
     })
     expect(rollup).toStrictEqual<Rollup>({
       status: CheckStatusState.Completed,
@@ -122,7 +122,7 @@ describe('rollupChecks', () => {
       filterWorkflowEvents: [],
       excludeWorkflowNames: ['*-1'],
       filterWorkflowNames: [],
-      possiblyTriggeredWorkflowFilePaths: [],
+      filterWorkflowFilePaths: [],
     })
     expect(rollup).toStrictEqual<Rollup>({
       status: CheckStatusState.Completed,
@@ -145,7 +145,7 @@ describe('rollupChecks', () => {
       filterWorkflowEvents: [],
       excludeWorkflowNames: [],
       filterWorkflowNames: ['*-2'],
-      possiblyTriggeredWorkflowFilePaths: [],
+      filterWorkflowFilePaths: [],
     })
     expect(rollup).toStrictEqual<Rollup>({
       status: CheckStatusState.Completed,
@@ -168,7 +168,7 @@ describe('rollupChecks', () => {
       filterWorkflowEvents: [],
       excludeWorkflowNames: ['*'],
       filterWorkflowNames: [],
-      possiblyTriggeredWorkflowFilePaths: [],
+      filterWorkflowFilePaths: [],
     })
     expect(rollup).toStrictEqual<Rollup>({
       status: CheckStatusState.Completed,
@@ -206,6 +206,7 @@ describe('filterLatestWorkflowRuns', () => {
         event: 'pull_request',
         url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/2',
         workflowName: 'test-success',
+        workflowFilePath: '.github/workflows/test-success.yaml',
       },
     ])
   })
