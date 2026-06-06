@@ -68,6 +68,7 @@ describe('rollupChecks', () => {
       filterWorkflowEvents: [],
       excludeWorkflowNames: [],
       filterWorkflowNames: [],
+      possiblyTriggeredWorkflowFilePaths: [],
     })
     expect(rollup).toStrictEqual<Rollup>({
       status: CheckStatusState.Completed,
@@ -79,6 +80,7 @@ describe('rollupChecks', () => {
           event: 'pull_request_target',
           url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/1',
           workflowName: 'workflow-1',
+          workflowFilePath: '.github/workflows/workflow-1.yaml',
         },
         {
           status: CheckStatusState.Completed,
@@ -86,6 +88,7 @@ describe('rollupChecks', () => {
           event: 'pull_request',
           url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/2',
           workflowName: 'workflow-2',
+          workflowFilePath: '.github/workflows/workflow-2.yaml',
         },
       ],
     })
@@ -96,6 +99,7 @@ describe('rollupChecks', () => {
       filterWorkflowEvents: ['pull_request_target'],
       excludeWorkflowNames: [],
       filterWorkflowNames: [],
+      possiblyTriggeredWorkflowFilePaths: [],
     })
     expect(rollup).toStrictEqual<Rollup>({
       status: CheckStatusState.Completed,
@@ -107,6 +111,7 @@ describe('rollupChecks', () => {
           event: 'pull_request_target',
           url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/1',
           workflowName: 'workflow-1',
+          workflowFilePath: '.github/workflows/workflow-1.yaml',
         },
       ],
     })
@@ -117,6 +122,7 @@ describe('rollupChecks', () => {
       filterWorkflowEvents: [],
       excludeWorkflowNames: ['*-1'],
       filterWorkflowNames: [],
+      possiblyTriggeredWorkflowFilePaths: [],
     })
     expect(rollup).toStrictEqual<Rollup>({
       status: CheckStatusState.Completed,
@@ -128,6 +134,7 @@ describe('rollupChecks', () => {
           event: 'pull_request',
           url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/2',
           workflowName: 'workflow-2',
+          workflowFilePath: '.github/workflows/workflow-2.yaml',
         },
       ],
     })
@@ -138,6 +145,7 @@ describe('rollupChecks', () => {
       filterWorkflowEvents: [],
       excludeWorkflowNames: [],
       filterWorkflowNames: ['*-2'],
+      possiblyTriggeredWorkflowFilePaths: [],
     })
     expect(rollup).toStrictEqual<Rollup>({
       status: CheckStatusState.Completed,
@@ -149,6 +157,7 @@ describe('rollupChecks', () => {
           event: 'pull_request',
           url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/2',
           workflowName: 'workflow-2',
+          workflowFilePath: '.github/workflows/workflow-2.yaml',
         },
       ],
     })
@@ -159,6 +168,7 @@ describe('rollupChecks', () => {
       filterWorkflowEvents: [],
       excludeWorkflowNames: ['*'],
       filterWorkflowNames: [],
+      possiblyTriggeredWorkflowFilePaths: [],
     })
     expect(rollup).toStrictEqual<Rollup>({
       status: CheckStatusState.Completed,
@@ -177,6 +187,7 @@ describe('filterLatestWorkflowRuns', () => {
         event: 'pull_request',
         url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/1',
         workflowName: 'test-success',
+        workflowFilePath: '.github/workflows/test-success.yaml',
       },
       {
         status: CheckStatusState.Completed,
@@ -184,6 +195,7 @@ describe('filterLatestWorkflowRuns', () => {
         event: 'pull_request',
         url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/2',
         workflowName: 'test-success',
+        workflowFilePath: '.github/workflows/test-success.yaml',
       },
     ]
     const latestWorkflowRuns = filterLatestWorkflowRuns(runs)
@@ -206,6 +218,7 @@ describe('determineRollup functions', () => {
     event: 'pull_request',
     url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/1',
     workflowName: 'test-success',
+    workflowFilePath: '.github/workflows/test-success.yaml',
   }
   const runFailure = {
     status: CheckStatusState.Completed,
@@ -213,6 +226,7 @@ describe('determineRollup functions', () => {
     event: 'pull_request',
     url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/1',
     workflowName: 'test-failure',
+    workflowFilePath: '.github/workflows/test-failure.yaml',
   }
   const runInProgress = {
     status: CheckStatusState.InProgress,
@@ -220,6 +234,7 @@ describe('determineRollup functions', () => {
     event: 'pull_request',
     url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/1',
     workflowName: 'test-in-progress',
+    workflowFilePath: '.github/workflows/test-in-progress.yaml',
   }
   const runQueued = {
     status: CheckStatusState.Queued,
@@ -227,6 +242,7 @@ describe('determineRollup functions', () => {
     event: 'pull_request',
     url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/1',
     workflowName: 'test-queued',
+    workflowFilePath: '.github/workflows/test-queued.yaml',
   }
 
   describe('determineRollupConclusion', () => {
