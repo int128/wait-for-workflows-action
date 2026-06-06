@@ -61,6 +61,7 @@ export const run = async (inputs: Inputs, octokit: Octokit, context: Context): P
 
 const poll = async (inputs: Inputs, octokit: Octokit, context: Context): Promise<Rollup> => {
   const possiblyTriggeredWorkflowFilePaths = await getPossiblyTriggeredWorkflowFilePaths(context)
+  core.info(`possiblyTriggeredWorkflowFilePaths: ${possiblyTriggeredWorkflowFilePaths.join(', ')}`)
   for (;;) {
     core.startGroup(`GraphQL request`)
     const checks = await getListChecksQuery(octokit, {

@@ -30,6 +30,7 @@ const parseWorkflowFiles = async function* (cwd: string): AsyncGenerator<Workflo
         path: workflowFile,
         workflow: Workflow.parse(yaml.load(content)),
       }
+      core.info(`Parsed ${workflowFile}`)
     } catch (error) {
       core.warning(`Failed to parse ${workflowFile}: ${error}`)
     }
