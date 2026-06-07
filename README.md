@@ -99,12 +99,18 @@ jobs:
           fail-fast: false
 ```
 
-### Filter workflow runs by event type
+### Filter workflow runs by current event type
 
-When this action is called on `pull_request` event, it evaluates the workflow runs of all types.
-It may cause unexpected failure, for example, the `labeled` type is triggered after `opened` type.
+By default, this action evaluates the workflow runs triggered by all types of the current event.
+It may cause unexpected failure when a workflow is triggered by multiple types.
+For example,
 
-You can set `filter-event-type` to filter workflow runs by the current event type.
+1. This action is triggered by `pull_request` event of type `opened`.
+2. A workflow run is triggered by `pull_request` event of type `labeled`.
+3. This action evaluates the workflow runs triggered by both `opened` and `labeled` types.
+   If the workflow run of `labeled` type is failed, this action exits with failure, even if the workflow run of `opened` type is successful.
+
+You can set `filter-by-current-event-type` to filter workflow runs by the current event type.
 
 ```yaml
 jobs:
@@ -114,7 +120,7 @@ jobs:
     steps:
       - uses: int128/wait-for-workflows-action@v1
         with:
-          filter-event-type: true
+          filter-by-current-event-type: true
 ```
 
 ## Caveats

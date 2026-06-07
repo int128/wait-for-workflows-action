@@ -6,7 +6,6 @@ import {
   formatConclusion,
   formatStatus,
   type Rollup,
-  type RollupOptions,
   rollupChecks,
 } from './checks.js'
 import { CheckConclusionState, CheckStatusState } from './generated/graphql-types.js'
@@ -28,6 +27,7 @@ type Inputs = {
   filterWorkflowEvents: string[]
   excludeWorkflowNames: string[]
   filterWorkflowNames: string[]
+  filterByCurrentEventType: boolean
 }
 
 type Outputs = {
@@ -60,7 +60,11 @@ export const run = async (inputs: Inputs, octokit: Octokit, context: Context): P
 }
 
 const poll = async (inputs: Inputs, octokit: Octokit, context: Context): Promise<Rollup> => {
-  const workflowFilePathsForCurrentEventType = await getWorkflowFilePathsForCurrentEventType(context)
+  let workflowFilePathsForCurrentEventType: string[] = []
+  if (inputs.filterByCurrentEventType) {
+    workflowFilePathsForCurrentEventType = await getWorkflowFilePathsForCurrentEventType(context)
+  }
+
   for (;;) {
     core.startGroup(`GraphQL request`)
     const checks = await getListChecksQuery(octokit, {
