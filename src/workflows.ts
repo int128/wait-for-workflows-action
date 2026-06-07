@@ -6,15 +6,18 @@ import { z } from 'zod'
 import type { Context } from './github.js'
 
 const Workflow = z.object({
-  on: z.record(
-    z.string(),
-    z
-      .object({
-        types: z.array(z.string()).optional(),
-      })
-      .nullable()
-      .optional(),
-  ),
+  on: z.union([
+    z.record(
+      z.string(),
+      z
+        .object({
+          types: z.array(z.string()).optional(),
+        })
+        .nullable()
+        .optional(),
+    ),
+    z.array(z.string()),
+  ]),
 })
 
 type Workflow = z.infer<typeof Workflow>
@@ -39,23 +42,33 @@ const parseWorkflowFiles = async function* (cwd: string): AsyncGenerator<Workflo
   }
 }
 
+const findEventFilter = (workflowFile: WorkflowFile, eventName: string) => {
+  if (Array.isArray(workflowFile.workflow.on)) {
+    if (workflowFile.workflow.on.includes(eventName)) {
+      return null
+    }
+    return undefined
+  }
+  return workflowFile.workflow.on[eventName]
+}
+
 const filterByCurrentActivityType = (workflowFile: WorkflowFile, context: Context) => {
-  const eventCondition = workflowFile.workflow.on[context.eventName]
-  if (eventCondition === undefined) {
+  const eventFilter = findEventFilter(workflowFile, context.eventName)
+  if (eventFilter === undefined) {
     return false
   }
   if (context.eventName === 'pull_request' && 'action' in context.payload) {
     // https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#pull_request
-    const possibleActivityTypes = eventCondition?.types ?? ['opened', 'synchronize', 'reopened']
+    const possibleActivityTypes = eventFilter?.types ?? ['opened', 'synchronize', 'reopened']
     return possibleActivityTypes.includes(context.payload.action)
   }
   if (context.eventName === 'pull_request_target' && 'action' in context.payload) {
     // https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#pull_request_target
-    const possibleActivityTypes = eventCondition?.types ?? ['opened', 'synchronize', 'reopened']
+    const possibleActivityTypes = eventFilter?.types ?? ['opened', 'synchronize', 'reopened']
     return possibleActivityTypes.includes(context.payload.action)
   }
-  if (eventCondition?.types !== undefined && 'action' in context.payload) {
-    return eventCondition.types.includes(context.payload.action)
+  if (eventFilter?.types !== undefined && 'action' in context.payload) {
+    return eventFilter.types.includes(context.payload.action)
   }
   return true
 }

@@ -23,7 +23,10 @@ describe('getWorkflowFilePathsForCurrentActivityType', () => {
     const workflowPathsForCurrentActivityType = await getWorkflowFilePathsForCurrentActivityType(
       getFixtureContext('pull_request', 'opened'),
     )
-    expect(workflowPathsForCurrentActivityType).toEqual(['.github/workflows/wait-for-workflows.yaml'])
+    expect(workflowPathsForCurrentActivityType).toEqual([
+      '.github/workflows/on-strings.yaml',
+      '.github/workflows/wait-for-workflows.yaml',
+    ])
   })
 
   it('matches pull_request labeled workflow', async () => {
@@ -37,7 +40,10 @@ describe('getWorkflowFilePathsForCurrentActivityType', () => {
     const workflowPathsForCurrentActivityType = await getWorkflowFilePathsForCurrentActivityType(
       getFixtureContext('push'),
     )
-    expect(workflowPathsForCurrentActivityType).toEqual(['.github/workflows/push-fixture.yaml'])
+    expect(workflowPathsForCurrentActivityType).toEqual([
+      '.github/workflows/on-strings.yaml',
+      '.github/workflows/push-fixture.yaml',
+    ])
   })
 
   it('returns empty when no workflow matches the current event', async () => {
