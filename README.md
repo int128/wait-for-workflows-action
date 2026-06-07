@@ -99,28 +99,35 @@ jobs:
           fail-fast: false
 ```
 
-### Filter workflow runs by current event type
+### Filter workflow runs by current activity type
 
-By default, this action evaluates the workflow runs triggered by all types of the current event.
-It may cause unexpected failure when a workflow is triggered by multiple types.
+By default, this action evaluates the workflow runs triggered by all activity types of the current event.
+It may cause unexpected failure if there are workflow runs triggered by multiple activity types.
 For example,
 
-1. This action is triggered by `pull_request` event of type `opened`.
-2. A workflow run is triggered by `pull_request` event of type `labeled`.
-3. This action evaluates the workflow runs triggered by both `opened` and `labeled` types.
-   If the workflow run of `labeled` type is failed, this action exits with failure, even if the workflow run of `opened` type is successful.
+1. This action is triggered by `pull_request` event.
+2. A workflow run is triggered by `pull_request` event with activity type `opened`.
+3. A workflow run is triggered by `pull_request` event with activity type `labeled`.
+4. This action evaluates the workflow runs triggered by both `opened` and `labeled` activity types.
+   If the workflow run of `labeled` activity type is failed, this action exits with failure, even if the workflow run of `opened` activity type is successful.
 
-You can set `filter-by-current-event-type` to filter workflow runs by the current event type.
+You can set `filter-by-current-activity-type` to filter workflow runs by the current activity type.
 
 ```yaml
+on:
+  pull_request:
+
 jobs:
   wait-for-workflows:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
+      - uses: actions/checkout@v6
       - uses: int128/wait-for-workflows-action@v1
         with:
-          filter-by-current-event-type: true
+          # Filter workflow runs triggered by the current activity type such as opened, synchronize, or reopened.
+          # It excludes other activity types such as labeled or unlabeled.
+          filter-by-current-activity-type: true
 ```
 
 ## Caveats
@@ -141,17 +148,18 @@ See [rate limiting](https://docs.github.com/en/rest/overview/resources-in-the-re
 
 ### Inputs
 
-| Name                        | Default                                              | Description                                 |
-| --------------------------- | ---------------------------------------------------- | ------------------------------------------- |
-| `filter-workflow-names`     | -                                                    | Filter workflows by name patterns           |
-| `exclude-workflow-names`    | -                                                    | Exclude workflows by name patterns          |
-| `filter-workflow-events`    | `github.event_name`                                  | Filter workflows by events                  |
-| `fail-fast`                 | true                                                 | Exit immediately if any workflow is failing |
-| `initial-delay-seconds`     | 10                                                   | Initial delay before polling                |
-| `period-seconds`            | 15                                                   | Polling period                              |
-| `page-size-of-check-suites` | 100                                                  | Page size of CheckSuites query              |
-| `sha`                       | `github.event.pull_request.head.sha` or `github.sha` | Commit SHA to wait for                      |
-| `token`                     | `github.token`                                       | GitHub token                                |
+| Name                              | Default                                              | Description                                                    |
+| --------------------------------- | ---------------------------------------------------- | -------------------------------------------------------------- |
+| `filter-workflow-names`           | -                                                    | Filter workflows by name patterns                              |
+| `exclude-workflow-names`          | -                                                    | Exclude workflows by name patterns                             |
+| `filter-workflow-events`          | `github.event_name`                                  | Filter workflows by events                                     |
+| `filter-by-current-activity-type` | false                                                | Filter workflow runs by the activity type of the current event |
+| `fail-fast`                       | true                                                 | Exit immediately if any workflow is failing                    |
+| `initial-delay-seconds`           | 10                                                   | Initial delay before polling                                   |
+| `period-seconds`                  | 15                                                   | Polling period                                                 |
+| `page-size-of-check-suites`       | 100                                                  | Page size of CheckSuites query                                 |
+| `sha`                             | `github.event.pull_request.head.sha` or `github.sha` | Commit SHA to wait for                                         |
+| `token`                           | `github.token`                                       | GitHub token                                                   |
 
 ### Outputs
 

@@ -11,7 +11,7 @@ import {
 import { CheckConclusionState, CheckStatusState } from './generated/graphql-types.js'
 import type { Context } from './github.js'
 import { getListChecksQuery } from './queries/listChecks.js'
-import { getWorkflowFilePathsForCurrentEventType } from './workflows.js'
+import { getWorkflowFilePathsForCurrentActivityType } from './workflows.js'
 
 // https://api.github.com/apps/github-actions
 const GITHUB_ACTIONS_APP_ID = 15368
@@ -27,7 +27,7 @@ type Inputs = {
   filterWorkflowEvents: string[]
   excludeWorkflowNames: string[]
   filterWorkflowNames: string[]
-  filterByCurrentEventType: boolean
+  filterByCurrentActivityType: boolean
 }
 
 type Outputs = {
@@ -60,9 +60,9 @@ export const run = async (inputs: Inputs, octokit: Octokit, context: Context): P
 }
 
 const poll = async (inputs: Inputs, octokit: Octokit, context: Context): Promise<Rollup> => {
-  let workflowFilePathsForCurrentEventType: string[] = []
-  if (inputs.filterByCurrentEventType) {
-    workflowFilePathsForCurrentEventType = await getWorkflowFilePathsForCurrentEventType(context)
+  let workflowFilePathsForCurrentActivityType: string[] = []
+  if (inputs.filterByCurrentActivityType) {
+    workflowFilePathsForCurrentActivityType = await getWorkflowFilePathsForCurrentActivityType(context)
   }
 
   for (;;) {
@@ -81,7 +81,7 @@ const poll = async (inputs: Inputs, octokit: Octokit, context: Context): Promise
       filterWorkflowEvents: inputs.filterWorkflowEvents,
       excludeWorkflowNames: inputs.excludeWorkflowNames,
       filterWorkflowNames: inputs.filterWorkflowNames,
-      filterWorkflowFilePaths: workflowFilePathsForCurrentEventType,
+      filterWorkflowFilePaths: workflowFilePathsForCurrentActivityType,
     })
     const completedCount = filterCompletedWorkflowRuns(rollup.workflowRuns).length
     core.startGroup(`Current workflow runs: ${completedCount} / ${rollup.workflowRuns.length} completed`)

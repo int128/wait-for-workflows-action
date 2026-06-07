@@ -12,8 +12,8 @@ inputs:
     description: Filter workflows by events (multiline)
     required: false
     default: ${{ github.event_name }}
-  filter-by-current-event-type:
-    description: Filter workflow runs by the current event type
+  filter-by-current-activity-type:
+    description: Filter workflow runs by the activity type of the current event
     required: true
     default: 'false'
   fail-fast:
