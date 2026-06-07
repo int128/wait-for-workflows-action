@@ -31,6 +31,9 @@ describe('rollupChecks', () => {
                 workflow: {
                   name: 'workflow-1',
                 },
+                file: {
+                  path: '.github/workflows/workflow-1.yaml',
+                },
               },
               status: CheckStatusState.Completed,
               conclusion: CheckConclusionState.Skipped,
@@ -41,6 +44,9 @@ describe('rollupChecks', () => {
                 url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/2',
                 workflow: {
                   name: 'workflow-2',
+                },
+                file: {
+                  path: '.github/workflows/workflow-2.yaml',
                 },
               },
               status: CheckStatusState.Completed,
