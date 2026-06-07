@@ -41,7 +41,11 @@ const getWorkflowFilePathsForPullRequestActivityType = async function* (activity
   for await (const workflowFile of parseWorkflowFiles(workspace)) {
     if (workflowFile.workflow.on.pull_request !== undefined) {
       // https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#pull_request
-      const workflowActivityTypes = workflowFile.workflow.on.pull_request?.types ?? ['opened', 'synchronize', 'reopened']
+      const workflowActivityTypes = workflowFile.workflow.on.pull_request?.types ?? [
+        'opened',
+        'synchronize',
+        'reopened',
+      ]
       if (workflowActivityTypes.includes(activityType)) {
         yield workflowFile.path
       }
