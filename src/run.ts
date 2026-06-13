@@ -62,7 +62,9 @@ export const run = async (inputs: Inputs, octokit: Octokit, context: Context): P
 const poll = async (inputs: Inputs, octokit: Octokit, context: Context): Promise<Rollup> => {
   let workflowFilePathsForCurrentActivityType: string[] = []
   if (inputs.filterByCurrentActivityType) {
+    core.startGroup(`Getting workflow files for the current activity type`)
     workflowFilePathsForCurrentActivityType = await getWorkflowFilePathsForCurrentActivityType(context)
+    core.endGroup()
   }
 
   for (;;) {
