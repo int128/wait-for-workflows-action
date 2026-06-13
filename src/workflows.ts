@@ -33,7 +33,7 @@ const parseWorkflowFiles = async function* (cwd: string): AsyncGenerator<Workflo
     try {
       yield {
         path: workflowFile,
-        workflow: Workflow.parse(yaml.load(content)),
+        workflow: Workflow.parse(yaml.load(content, { schema: yaml.CORE_SCHEMA })),
       }
       core.info(`Parsed ${workflowFile}`)
     } catch (error) {
