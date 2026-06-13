@@ -79,6 +79,7 @@ const filterByCurrentActivityType = (workflowFile: WorkflowFile, context: Contex
 export const getWorkflowFilePathsForCurrentActivityType = async (context: Context): Promise<string[]> => {
   const workflowFiles = await Array.fromAsync(parseWorkflowFiles(context.workspace))
   if (workflowFiles.length === 0) {
+    // It should contain the workflow file calling this action.
     throw new Error(
       `No workflow file found. You need to checkout the repository to enable filter-by-current-activity-type option.`,
     )
