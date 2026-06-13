@@ -17,6 +17,7 @@ const Workflow = z.object({
         .optional(),
     ),
     z.array(z.string()),
+    z.string(),
   ]),
 })
 
@@ -43,6 +44,12 @@ const parseWorkflowFiles = async function* (cwd: string): AsyncGenerator<Workflo
 }
 
 const findEventFilter = (workflowFile: WorkflowFile, eventName: string) => {
+  if (typeof workflowFile.workflow.on === 'string') {
+    if (workflowFile.workflow.on === eventName) {
+      return null
+    }
+    return undefined
+  }
   if (Array.isArray(workflowFile.workflow.on)) {
     if (workflowFile.workflow.on.includes(eventName)) {
       return null

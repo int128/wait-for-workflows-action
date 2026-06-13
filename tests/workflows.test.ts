@@ -41,6 +41,7 @@ describe('getWorkflowFilePathsForCurrentActivityType', () => {
       getFixtureContext('push'),
     )
     expect(workflowPathsForCurrentActivityType).toEqual([
+      '.github/workflows/on-string.yaml',
       '.github/workflows/on-strings.yaml',
       '.github/workflows/push-fixture.yaml',
     ])
