@@ -23,9 +23,6 @@ importers:
       graphql:
         specifier: 16.14.1
         version: 16.14.1
-      minimatch:
-        specifier: 10.2.5
-        version: 10.2.5
     devDependencies:
       '@biomejs/biome':
         specifier: 2.4.16

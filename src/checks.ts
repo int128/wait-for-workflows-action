@@ -1,5 +1,5 @@
 import assert from 'node:assert'
-import * as minimatch from 'minimatch'
+import { matchesGlob } from 'node:path'
 import type { ListChecksQuery } from './generated/graphql.js'
 import { CheckConclusionState, CheckStatusState } from './generated/graphql-types.js'
 
@@ -53,8 +53,8 @@ export const rollupChecks = (checks: ListChecksQuery, options: RollupOptions): R
 
   const latestWorkflowRuns = filterLatestWorkflowRuns(rawWorkflowRuns)
 
-  const excludeWorkflowNameMatchers = options.excludeWorkflowNames.map((pattern) => minimatch.filter(pattern))
-  const filterWorkflowNameMatchers = options.filterWorkflowNames.map((pattern) => minimatch.filter(pattern))
+  const excludeWorkflowNameMatcher = createGlobMatcher(options.excludeWorkflowNames, false)
+  const filterWorkflowNameMatcher = createGlobMatcher(options.filterWorkflowNames)
   const workflowRuns = latestWorkflowRuns.filter((workflowRun) => {
     // Exclude self to prevent the infinite loop
     if (workflowRun.workflowName === options.selfWorkflowName) {
@@ -67,18 +67,11 @@ export const rollupChecks = (checks: ListChecksQuery, options: RollupOptions): R
       }
     }
     // Exclude workflows by names
-    if (excludeWorkflowNameMatchers.length > 0) {
-      if (excludeWorkflowNameMatchers.some((match) => match(workflowRun.workflowName))) {
-        return false
-      }
+    if (excludeWorkflowNameMatcher(workflowRun.workflowName)) {
+      return false
     }
     // Filter workflows by names
-    if (filterWorkflowNameMatchers.length > 0) {
-      if (!filterWorkflowNameMatchers.some((match) => match(workflowRun.workflowName))) {
-        return false
-      }
-    }
-    return true
+    return filterWorkflowNameMatcher(workflowRun.workflowName)
   })
 
   sortByWorkflowName(workflowRuns)
@@ -89,6 +82,24 @@ export const rollupChecks = (checks: ListChecksQuery, options: RollupOptions): R
     workflowRuns,
   }
 }
+
+const createGlobMatcher =
+  (patterns: string[], defaultValue = true) =>
+  (target: string): boolean => {
+    if (patterns.length === 0) {
+      return defaultValue
+    }
+    // The patterns must contain at least one positive pattern, otherwise the negation patterns will be ignored.
+    let matched = false
+    for (const pattern of patterns) {
+      if (pattern.startsWith('!')) {
+        matched = matched && !matchesGlob(target, pattern.slice(1))
+      } else {
+        matched = matched || matchesGlob(target, pattern)
+      }
+    }
+    return matched
+  }
 
 export const filterLatestWorkflowRuns = (workflowRuns: WorkflowRun[]): WorkflowRun[] => {
   const latestWorkflowRuns = new Map<string, WorkflowRun>()
