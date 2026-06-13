@@ -1,7 +1,7 @@
 import assert from 'node:assert'
+import { matchesGlob } from 'node:path'
 import type { ListChecksQuery } from './generated/graphql.js'
 import { CheckConclusionState, CheckStatusState } from './generated/graphql-types.js'
-import { matchesGlob } from 'node:path'
 
 export type Rollup = {
   status: RollupStatus
