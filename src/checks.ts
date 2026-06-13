@@ -59,8 +59,11 @@ export const rollupChecks = (checks: ListChecksQuery, options: RollupOptions): R
   const excludeWorkflowNameMatcher = createGlobMatcher(options.excludeWorkflowNames, false)
   const filterWorkflowNameMatcher = createGlobMatcher(options.filterWorkflowNames)
   const workflowRuns = latestWorkflowRuns.filter((workflowRun) => {
-    if (options.filterWorkflowFilePaths.length > 0 && workflowRun.workflowFilePath != null) {
-      if (!options.filterWorkflowFilePaths.includes(workflowRun.workflowFilePath)) {
+    if (options.filterWorkflowFilePaths.length > 0) {
+      if (
+        workflowRun.workflowFilePath != null &&
+        !options.filterWorkflowFilePaths.includes(workflowRun.workflowFilePath)
+      ) {
         return false
       }
     }

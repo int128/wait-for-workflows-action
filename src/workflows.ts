@@ -31,15 +31,11 @@ type WorkflowFile = {
 const parseWorkflowFiles = async function* (cwd: string): AsyncGenerator<WorkflowFile> {
   for await (const workflowFile of fs.glob(['.github/workflows/*.yaml', '.github/workflows/*.yml'], { cwd })) {
     const content = await fs.readFile(path.join(cwd, workflowFile), 'utf-8')
-    try {
-      yield {
-        path: workflowFile,
-        workflow: Workflow.parse(yaml.load(content, { schema: yaml.CORE_SCHEMA })),
-      }
-      core.info(`Parsed ${workflowFile}`)
-    } catch (error) {
-      core.warning(`Failed to parse ${workflowFile}: ${error}`)
+    yield {
+      path: workflowFile,
+      workflow: Workflow.parse(yaml.load(content, { schema: yaml.CORE_SCHEMA })),
     }
+    core.info(`Parsed ${workflowFile}`)
   }
 }
 
