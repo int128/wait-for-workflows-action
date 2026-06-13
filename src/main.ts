@@ -9,6 +9,7 @@ const main = async (): Promise<void> => {
       filterWorkflowNames: core.getMultilineInput('filter-workflow-names'),
       excludeWorkflowNames: core.getMultilineInput('exclude-workflow-names'),
       filterWorkflowEvents: core.getMultilineInput('filter-workflow-events'),
+      filterByCurrentActivityType: core.getBooleanInput('filter-by-current-activity-type', { required: true }),
       failFast: core.getBooleanInput('fail-fast', { required: true }),
       initialDelaySeconds: Number.parseInt(core.getInput('initial-delay-seconds', { required: true }), 10),
       periodSeconds: Number.parseInt(core.getInput('period-seconds', { required: true }), 10),

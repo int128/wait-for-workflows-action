@@ -19,6 +19,7 @@ type WorkflowRun = {
   event: string
   url: string
   workflowName: string
+  workflowFilePath: string | undefined
 }
 
 export type RollupOptions = {
@@ -26,6 +27,7 @@ export type RollupOptions = {
   filterWorkflowEvents: string[]
   excludeWorkflowNames: string[]
   filterWorkflowNames: string[]
+  filterWorkflowFilePaths: string[]
 }
 
 export const rollupChecks = (checks: ListChecksQuery, options: RollupOptions): Rollup => {
@@ -48,6 +50,7 @@ export const rollupChecks = (checks: ListChecksQuery, options: RollupOptions): R
       event: node.workflowRun.event,
       url: node.workflowRun.url,
       workflowName: node.workflowRun.workflow.name,
+      workflowFilePath: node.workflowRun.file?.path,
     })
   }
 
@@ -56,6 +59,14 @@ export const rollupChecks = (checks: ListChecksQuery, options: RollupOptions): R
   const excludeWorkflowNameMatcher = createGlobMatcher(options.excludeWorkflowNames, false)
   const filterWorkflowNameMatcher = createGlobMatcher(options.filterWorkflowNames)
   const workflowRuns = latestWorkflowRuns.filter((workflowRun) => {
+    if (options.filterWorkflowFilePaths.length > 0) {
+      if (
+        workflowRun.workflowFilePath != null &&
+        !options.filterWorkflowFilePaths.includes(workflowRun.workflowFilePath)
+      ) {
+        return false
+      }
+    }
     // Exclude self to prevent the infinite loop
     if (workflowRun.workflowName === options.selfWorkflowName) {
       return false

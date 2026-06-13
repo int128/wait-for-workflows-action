@@ -1,0 +1,7 @@
+on: [push, pull_request]
+
+jobs:
+  dummy:
+    runs-on: ubuntu-latest
+    steps:
+      - run: exit 1
