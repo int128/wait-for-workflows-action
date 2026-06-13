@@ -1,0 +1,15 @@
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  deployment:
+  issue_comment:
+    types: [created]
+  push:
+    branches:
+      - main
+
+jobs:
+  dummy:
+    runs-on: ubuntu-latest
+    steps:
+      - run: exit 1
