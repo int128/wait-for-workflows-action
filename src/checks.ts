@@ -89,6 +89,7 @@ const createGlobMatcher =
     if (patterns.length === 0) {
       return defaultValue
     }
+    // The patterns must contain at least one positive pattern, otherwise the negation patterns will be ignored.
     let matched = false
     for (const pattern of patterns) {
       if (pattern.startsWith('!')) {
