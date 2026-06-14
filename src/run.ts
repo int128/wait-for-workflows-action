@@ -39,8 +39,6 @@ export const run = async (inputs: Inputs, octokit: Octokit, context: Context): P
   core.info(`Target commit: ${inputs.sha}`)
   core.info(`Filtering workflows by event: ${inputs.filterWorkflowEvents.join(', ')}`)
   core.info(`Excluding workflow name: ${inputs.excludeWorkflowNames.join(', ')}`)
-  core.info(`Waiting for initial delay ${inputs.initialDelaySeconds}s`)
-  await sleep(inputs.initialDelaySeconds * 1000)
 
   const rollup = await poll(inputs, octokit, context)
   core.info(`----`)
@@ -62,11 +60,11 @@ export const run = async (inputs: Inputs, octokit: Octokit, context: Context): P
 const poll = async (inputs: Inputs, octokit: Octokit, context: Context): Promise<Rollup> => {
   let workflowFilePathsForCurrentActivityType: string[] = []
   if (inputs.filterByCurrentActivityType) {
-    core.startGroup(`Getting workflow files for the current activity type`)
     workflowFilePathsForCurrentActivityType = await getWorkflowFilePathsForCurrentActivityType(context)
-    core.endGroup()
   }
 
+  core.info(`Waiting for initial delay ${inputs.initialDelaySeconds}s`)
+  await sleep(inputs.initialDelaySeconds * 1000)
   for (;;) {
     core.startGroup(`GraphQL request`)
     const checks = await getListChecksQuery(octokit, {
