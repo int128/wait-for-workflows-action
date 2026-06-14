@@ -47,15 +47,15 @@ const parseWorkflowFiles = async function* (cwd: string): AsyncGenerator<Workflo
 
 type Trigger = { types?: string[] }
 
-const findTrigger = (workflowFile: WorkflowFile, eventName: string): Trigger | false => {
+const findTrigger = (workflowFile: WorkflowFile, eventName: string): Trigger | null => {
   if (typeof workflowFile.workflow.on === 'string') {
-    return workflowFile.workflow.on === eventName ? {} : false
+    return workflowFile.workflow.on === eventName ? {} : null
   } else if (Array.isArray(workflowFile.workflow.on)) {
-    return workflowFile.workflow.on.includes(eventName) ? {} : false
+    return workflowFile.workflow.on.includes(eventName) ? {} : null
   }
   const trigger = workflowFile.workflow.on[eventName]
   if (trigger === undefined) {
-    return false
+    return null
   } else if (trigger === null) {
     return {}
   } else if (Array.isArray(trigger)) {
@@ -64,10 +64,10 @@ const findTrigger = (workflowFile: WorkflowFile, eventName: string): Trigger | f
   return trigger
 }
 
-const findActivityTypes = (workflowFile: WorkflowFile, eventName: string): string[] | true | false => {
+const findActivityTypes = (workflowFile: WorkflowFile, eventName: string): string[] | true | null => {
   const trigger = findTrigger(workflowFile, eventName)
-  if (trigger === false) {
-    return false
+  if (trigger === null) {
+    return null
   }
   if (eventName === 'pull_request' || eventName === 'pull_request_target') {
     // https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#pull_request
@@ -83,7 +83,7 @@ const matchActivityType = (workflowFile: WorkflowFile, eventName: string, action
   if (activityTypes === true) {
     core.info(`[o] ${workflowFile.path}: any types`)
     return true
-  } else if (activityTypes === false) {
+  } else if (activityTypes === null) {
     core.info(`[-] ${workflowFile.path}: no ${eventName} trigger`)
     return false
   } else if (activityTypes.includes(action)) {
