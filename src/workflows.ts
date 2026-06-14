@@ -9,13 +9,15 @@ const Workflow = z.object({
   on: z.union([
     z.record(
       z.string(),
-      z.union([
-        z.null(),
-        z.array(z.any()),
-        z.object({
-          types: z.array(z.string()).optional(),
-        }),
-      ]),
+      z
+        .union([
+          z.array(z.any()),
+          z.object({
+            types: z.array(z.string()).optional(),
+          }),
+        ])
+        .nullable()
+        .optional(),
     ),
     z.array(z.string()),
     z.string(),
@@ -43,41 +45,65 @@ const parseWorkflowFiles = async function* (cwd: string): AsyncGenerator<Workflo
   }
 }
 
-const getTrigger = (workflowFile: WorkflowFile, eventName: string) => {
-  if (typeof workflowFile.workflow.on === 'string') {
-    if (workflowFile.workflow.on === eventName) {
-      return null
-    }
-    return undefined
-  }
-  if (Array.isArray(workflowFile.workflow.on)) {
-    if (workflowFile.workflow.on.includes(eventName)) {
-      return null
-    }
-    return undefined
-  }
-  const trigger = workflowFile.workflow.on[eventName]
-  if (Array.isArray(trigger)) {
-    return null
-  }
-  return trigger
-}
+type ActivityTypeFilter = string[] | 'all-types' | null
 
-const getActivityTypes = (workflowFile: WorkflowFile, eventName: string): string[] | null | undefined => {
-  const trigger = getTrigger(workflowFile, eventName)
-  if (trigger === undefined) {
-    return undefined
-  }
+const getDefaultActivityTypeFilter = (eventName: string): ActivityTypeFilter => {
   if (eventName === 'pull_request' || eventName === 'pull_request_target') {
     // https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#pull_request
     // https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#pull_request_target
-    return trigger?.types ?? ['opened', 'synchronize', 'reopened']
+    return ['opened', 'synchronize', 'reopened']
   }
-  // If types is not specified in the trigger, it matches all activity types.
-  return trigger?.types ?? null
+  // If the types are not specified in the trigger, it means all types.
+  return 'all-types'
+}
+
+const findActivityTypeFilter = (workflowFile: WorkflowFile, eventName: string): ActivityTypeFilter => {
+  if (typeof workflowFile.workflow.on === 'string') {
+    if (workflowFile.workflow.on === eventName) {
+      return getDefaultActivityTypeFilter(eventName)
+    }
+    return null
+  } else if (Array.isArray(workflowFile.workflow.on)) {
+    if (workflowFile.workflow.on.includes(eventName)) {
+      return getDefaultActivityTypeFilter(eventName)
+    }
+    return null
+  }
+
+  const trigger = workflowFile.workflow.on[eventName]
+  if (trigger === undefined) {
+    return null
+  } else if (trigger === null) {
+    return getDefaultActivityTypeFilter(eventName)
+  } else if (Array.isArray(trigger)) {
+    return getDefaultActivityTypeFilter(eventName)
+  } else if (trigger.types === undefined) {
+    return getDefaultActivityTypeFilter(eventName)
+  }
+  return trigger.types
+}
+
+const matchActivityType = (workflowFile: WorkflowFile, eventName: string, action: string) => {
+  const activityTypeFilter = findActivityTypeFilter(workflowFile, eventName)
+  if (activityTypeFilter === null) {
+    core.info(`[-] ${workflowFile.path}: no trigger for event ${eventName}`)
+    return false
+  } else if (activityTypeFilter === 'all-types') {
+    core.info(`[o] ${workflowFile.path}: matches all types`)
+    return true
+  } else if (activityTypeFilter.includes(action)) {
+    core.info(`[o] ${workflowFile.path}: types [${activityTypeFilter.join(', ')}] matches`)
+    return true
+  }
+  core.info(`[x] ${workflowFile.path}: types [${activityTypeFilter.join(', ')}] does not match`)
+  return false
 }
 
 export const getWorkflowFilePathsForCurrentActivityType = async (context: Context): Promise<string[]> => {
+  if (!('action' in context.payload)) {
+    core.info(`The event ${context.eventName} does not have action. Skipping filter-by-current-activity-type feature.`)
+    return []
+  }
   const workflowFiles = await Array.fromAsync(parseWorkflowFiles(context.workspace))
   if (workflowFiles.length === 0) {
     // It should contain the workflow file calling this action.
@@ -85,20 +111,11 @@ export const getWorkflowFilePathsForCurrentActivityType = async (context: Contex
       `No workflow file found. You need to checkout the repository to enable filter-by-current-activity-type option.`,
     )
   }
-
-  const workflowFilePaths: string[] = []
-  for (const workflowFile of workflowFiles) {
-    const activityTypes = getActivityTypes(workflowFile, context.eventName)
-    if (activityTypes === undefined) {
-      continue
-    }
-    core.info(`Workflow ${workflowFile.path}: ${activityTypes}`)
-    if (activityTypes === null || !('action' in context.payload)) {
-      // If types is not specified, it matches all activity types.
-      workflowFilePaths.push(workflowFile.path)
-    } else if (activityTypes.includes(context.payload.action)) {
-      workflowFilePaths.push(workflowFile.path)
-    }
-  }
-  return workflowFilePaths
+  const action = context.payload.action
+  core.startGroup(`Finding workflow files for event ${context.eventName} and action ${action}`)
+  const workflowFilesForActivityType = workflowFiles.filter((workflowFile) =>
+    matchActivityType(workflowFile, context.eventName, action),
+  )
+  core.endGroup()
+  return workflowFilesForActivityType.map((workflowFile) => workflowFile.path)
 }
