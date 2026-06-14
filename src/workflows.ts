@@ -45,7 +45,7 @@ const parseWorkflowFiles = async function* (cwd: string): AsyncGenerator<Workflo
   }
 }
 
-type ActivityTypeFilter = string[] | 'all' | null
+type ActivityTypeFilter = string[] | 'all-types' | null
 
 const getDefaultActivityTypeFilter = (eventName: string): ActivityTypeFilter => {
   if (eventName === 'pull_request' || eventName === 'pull_request_target') {
@@ -54,7 +54,7 @@ const getDefaultActivityTypeFilter = (eventName: string): ActivityTypeFilter => 
     return ['opened', 'synchronize', 'reopened']
   }
   // If the types are not specified in the trigger, it means all types.
-  return 'all'
+  return 'all-types'
 }
 
 const findActivityTypeFilter = (workflowFile: WorkflowFile, eventName: string): ActivityTypeFilter => {
@@ -88,18 +88,22 @@ const matchActivityType = (workflowFile: WorkflowFile, eventName: string, action
   if (activityTypeFilter === null) {
     core.info(`[-] ${workflowFile.path}: no trigger for event ${eventName}`)
     return false
-  } else if (activityTypeFilter === 'all') {
-    core.info(`[o] ${workflowFile.path}: all types`)
+  } else if (activityTypeFilter === 'all-types') {
+    core.info(`[o] ${workflowFile.path}: matches all types`)
     return true
   } else if (activityTypeFilter.includes(action)) {
-    core.info(`[o] ${workflowFile.path}: matched types [${activityTypeFilter.join(', ')}]`)
+    core.info(`[o] ${workflowFile.path}: types [${activityTypeFilter.join(', ')}] matches`)
     return true
   }
-  core.info(`[x] ${workflowFile.path}: not matched types [${activityTypeFilter.join(', ')}]`)
+  core.info(`[x] ${workflowFile.path}: types [${activityTypeFilter.join(', ')}] does not match`)
   return false
 }
 
 export const getWorkflowFilePathsForCurrentActivityType = async (context: Context): Promise<string[]> => {
+  if (!('action' in context.payload)) {
+    core.info(`The event ${context.eventName} does not have action. Skipping filter-by-current-activity-type feature.`)
+    return []
+  }
   const workflowFiles = await Array.fromAsync(parseWorkflowFiles(context.workspace))
   if (workflowFiles.length === 0) {
     // It should contain the workflow file calling this action.
@@ -107,7 +111,7 @@ export const getWorkflowFilePathsForCurrentActivityType = async (context: Contex
       `No workflow file found. You need to checkout the repository to enable filter-by-current-activity-type option.`,
     )
   }
-  const action = 'action' in context.payload ? context.payload.action : ''
+  const action = context.payload.action
   core.startGroup(`Finding workflow files for event ${context.eventName} and action ${action}`)
   const workflowFilesForActivityType = workflowFiles.filter((workflowFile) =>
     matchActivityType(workflowFile, context.eventName, action),

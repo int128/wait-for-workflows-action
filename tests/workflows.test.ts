@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import type { Context } from '../src/github.js'
 import { getWorkflowFilePathsForCurrentActivityType } from '../src/workflows.js'
 
-const getFixtureContext = (eventName: string, action?: string): Context => ({
+const getFixtureContext = (eventName: string, action: string | undefined): Context => ({
   eventName,
   repo: {
     owner: 'int128',
@@ -13,9 +13,7 @@ const getFixtureContext = (eventName: string, action?: string): Context => ({
   serverUrl: 'https://github.com',
   workflow: 'example',
   workspace: import.meta.dirname,
-  payload: {
-    action,
-  } as WebhookEvent,
+  payload: (action ? { action } : {}) as WebhookEvent,
 })
 
 describe('getWorkflowFilePathsForCurrentActivityType', () => {
@@ -36,21 +34,16 @@ describe('getWorkflowFilePathsForCurrentActivityType', () => {
     expect(workflowPathsForCurrentActivityType).toEqual(['.github/workflows/label-fixture.yaml'])
   })
 
-  it('matches push workflow', async () => {
+  it('returns empty when the current action is undefined', async () => {
     const workflowPathsForCurrentActivityType = await getWorkflowFilePathsForCurrentActivityType(
-      getFixtureContext('push'),
+      getFixtureContext('push', undefined),
     )
-    expect(workflowPathsForCurrentActivityType).toEqual([
-      '.github/workflows/on-mixed.yaml',
-      '.github/workflows/on-string.yaml',
-      '.github/workflows/on-strings.yaml',
-      '.github/workflows/push-fixture.yaml',
-    ])
+    expect(workflowPathsForCurrentActivityType).toEqual([])
   })
 
   it('returns empty when no workflow matches the current event', async () => {
     const workflowPathsForCurrentActivityType = await getWorkflowFilePathsForCurrentActivityType(
-      getFixtureContext('workflow_dispatch'),
+      getFixtureContext('discussion', 'created'),
     )
     expect(workflowPathsForCurrentActivityType).toEqual([])
   })
