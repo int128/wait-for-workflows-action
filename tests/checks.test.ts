@@ -22,6 +22,7 @@ describe('rollupChecks', () => {
           totalCount: 3,
           pageInfo: {
             hasNextPage: false,
+            endCursor: null,
           },
           nodes: [
             {
@@ -59,6 +60,7 @@ describe('rollupChecks', () => {
                 workflow: {
                   name: 'workflow-3',
                 },
+                file: null,
               },
               status: CheckStatusState.InProgress,
               conclusion: null,
