@@ -2,17 +2,17 @@ import * as core from '@actions/core'
 import type { Octokit } from '@octokit/action'
 import {
   filterCompletedWorkflowRuns,
-  isFailedConclusion,
   formatConclusion,
   formatStatus,
+  isFailedConclusion,
   type Rollup,
   rollupChecks,
 } from './checks.js'
 import { CheckConclusionState, CheckStatusState } from './generated/graphql-types.js'
 import type { Context } from './github.js'
 import { getListChecksQuery } from './queries/listChecks.js'
-import { getWorkflowFilePathsForCurrentActivityType } from './workflows.js'
 import { writeWorkflowRunsSummary } from './summary.js'
+import { getWorkflowFilePathsForCurrentActivityType } from './workflows.js'
 
 // https://api.github.com/apps/github-actions
 const GITHUB_ACTIONS_APP_ID = 15368
