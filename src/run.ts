@@ -116,6 +116,7 @@ const writeWorkflowRunsSummary = async (rollup: Rollup) => {
   core.summary.addRaw('<p>Rollup conclusion: ')
   core.summary.addRaw(formatConclusion(rollup.conclusion))
   core.summary.addRaw('</p>')
+  core.summary.addCodeBlock(getGanttTimeline(rollup), 'mermaid')
   core.summary.addTable([
     [
       { data: 'Workflow run', header: true },
@@ -129,6 +130,16 @@ const writeWorkflowRunsSummary = async (rollup: Rollup) => {
     ]),
   ])
   await core.summary.write()
+}
+
+const getGanttTimeline = (rollup: Rollup): string => {
+  const lines = ['gantt', 'dateFormat YYYY-MM-DDTHH:mm:ssZ', 'axisFormat %H:%M:%S']
+  for (const run of rollup.workflowRuns) {
+    const start = run.createdAt.toISOString()
+    const end = run.updatedAt.toISOString()
+    lines.push(`section ${run.workflowName}`, `${run.status} ${run.conclusion} :active, ${start}, ${end}`)
+  }
+  return lines.join('\n')
 }
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))

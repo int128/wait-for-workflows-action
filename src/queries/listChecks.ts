@@ -30,6 +30,8 @@ const query = /* GraphQL */ `
               workflowRun {
                 event
                 url
+                createdAt
+                updatedAt
                 workflow {
                   name
                 }

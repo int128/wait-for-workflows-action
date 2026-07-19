@@ -35,6 +35,8 @@ describe('rollupChecks', () => {
                 file: {
                   path: '.github/workflows/workflow-1.yaml',
                 },
+                createdAt: '2024-06-01T00:00:00Z',
+                updatedAt: '2024-06-01T00:01:00Z',
               },
               status: CheckStatusState.Completed,
               conclusion: CheckConclusionState.Skipped,
@@ -49,6 +51,8 @@ describe('rollupChecks', () => {
                 file: {
                   path: '.github/workflows/workflow-2.yaml',
                 },
+                createdAt: '2024-06-01T00:00:00Z',
+                updatedAt: '2024-06-01T00:01:00Z',
               },
               status: CheckStatusState.Completed,
               conclusion: CheckConclusionState.Success,
@@ -61,6 +65,8 @@ describe('rollupChecks', () => {
                   name: 'workflow-3',
                 },
                 file: null,
+                createdAt: '2024-06-01T00:00:00Z',
+                updatedAt: '2024-06-01T00:01:00Z',
               },
               status: CheckStatusState.InProgress,
               conclusion: null,
@@ -89,6 +95,8 @@ describe('rollupChecks', () => {
           url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/1',
           workflowName: 'workflow-1',
           workflowFilePath: '.github/workflows/workflow-1.yaml',
+          createdAt: new Date('2024-06-01T00:00:00Z'),
+          updatedAt: new Date('2024-06-01T00:01:00Z'),
         },
         {
           status: CheckStatusState.Completed,
@@ -97,6 +105,8 @@ describe('rollupChecks', () => {
           url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/2',
           workflowName: 'workflow-2',
           workflowFilePath: '.github/workflows/workflow-2.yaml',
+          createdAt: new Date('2024-06-01T00:00:00Z'),
+          updatedAt: new Date('2024-06-01T00:01:00Z'),
         },
       ],
     })
@@ -120,6 +130,8 @@ describe('rollupChecks', () => {
           url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/1',
           workflowName: 'workflow-1',
           workflowFilePath: '.github/workflows/workflow-1.yaml',
+          createdAt: new Date('2024-06-01T00:00:00Z'),
+          updatedAt: new Date('2024-06-01T00:01:00Z'),
         },
       ],
     })
@@ -143,6 +155,8 @@ describe('rollupChecks', () => {
           url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/2',
           workflowName: 'workflow-2',
           workflowFilePath: '.github/workflows/workflow-2.yaml',
+          createdAt: new Date('2024-06-01T00:00:00Z'),
+          updatedAt: new Date('2024-06-01T00:01:00Z'),
         },
       ],
     })
@@ -166,6 +180,8 @@ describe('rollupChecks', () => {
           url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/2',
           workflowName: 'workflow-2',
           workflowFilePath: '.github/workflows/workflow-2.yaml',
+          createdAt: new Date('2024-06-01T00:00:00Z'),
+          updatedAt: new Date('2024-06-01T00:01:00Z'),
         },
       ],
     })
@@ -196,6 +212,8 @@ describe('filterLatestWorkflowRuns', () => {
         url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/1',
         workflowName: 'test-success',
         workflowFilePath: '.github/workflows/test-success.yaml',
+        createdAt: new Date('2024-06-01T00:00:00Z'),
+        updatedAt: new Date('2024-06-01T00:01:00Z'),
       },
       {
         status: CheckStatusState.Completed,
@@ -204,6 +222,8 @@ describe('filterLatestWorkflowRuns', () => {
         url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/2',
         workflowName: 'test-success',
         workflowFilePath: '.github/workflows/test-success.yaml',
+        createdAt: new Date('2024-06-01T00:00:00Z'),
+        updatedAt: new Date('2024-06-01T00:01:00Z'),
       },
     ]
     const latestWorkflowRuns = filterLatestWorkflowRuns(runs)
@@ -215,6 +235,8 @@ describe('filterLatestWorkflowRuns', () => {
         url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/2',
         workflowName: 'test-success',
         workflowFilePath: '.github/workflows/test-success.yaml',
+        createdAt: new Date('2024-06-01T00:00:00Z'),
+        updatedAt: new Date('2024-06-01T00:01:00Z'),
       },
     ])
   })
@@ -228,6 +250,8 @@ describe('determineRollup functions', () => {
     url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/1',
     workflowName: 'test-success',
     workflowFilePath: '.github/workflows/test-success.yaml',
+    createdAt: new Date('2024-06-01T00:00:00Z'),
+    updatedAt: new Date('2024-06-01T00:01:00Z'),
   }
   const runFailure = {
     status: CheckStatusState.Completed,
@@ -236,6 +260,8 @@ describe('determineRollup functions', () => {
     url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/1',
     workflowName: 'test-failure',
     workflowFilePath: '.github/workflows/test-failure.yaml',
+    createdAt: new Date('2024-06-01T00:00:00Z'),
+    updatedAt: new Date('2024-06-01T00:01:00Z'),
   }
   const runInProgress = {
     status: CheckStatusState.InProgress,
@@ -244,6 +270,8 @@ describe('determineRollup functions', () => {
     url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/1',
     workflowName: 'test-in-progress',
     workflowFilePath: '.github/workflows/test-in-progress.yaml',
+    createdAt: new Date('2024-06-01T00:00:00Z'),
+    updatedAt: new Date('2024-06-01T00:01:00Z'),
   }
   const runQueued = {
     status: CheckStatusState.Queued,
@@ -252,6 +280,8 @@ describe('determineRollup functions', () => {
     url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/1',
     workflowName: 'test-queued',
     workflowFilePath: '.github/workflows/test-queued.yaml',
+    createdAt: new Date('2024-06-01T00:00:00Z'),
+    updatedAt: new Date('2024-06-01T00:01:00Z'),
   }
 
   describe('determineRollupConclusion', () => {

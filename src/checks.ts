@@ -20,6 +20,8 @@ type WorkflowRun = {
   url: string
   workflowName: string
   workflowFilePath: string | undefined
+  createdAt: Date
+  updatedAt: Date
 }
 
 export type RollupOptions = {
@@ -51,6 +53,8 @@ export const rollupChecks = (checks: ListChecksQuery, options: RollupOptions): R
       url: node.workflowRun.url,
       workflowName: node.workflowRun.workflow.name,
       workflowFilePath: node.workflowRun.file?.path,
+      createdAt: new Date(node.workflowRun.createdAt),
+      updatedAt: new Date(node.workflowRun.updatedAt),
     })
   }
 

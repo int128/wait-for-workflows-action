@@ -52,7 +52,7 @@ export type ListChecksQueryVariables = Exact<{
 
 export type ListChecksQuery = { rateLimit: { cost: number, remaining: number } | null, repository: { object:
       | { __typename: 'Blob' }
-      | { __typename: 'Commit', checkSuites: { totalCount: number, pageInfo: { hasNextPage: boolean, endCursor: string | null }, nodes: Array<{ status: Types.CheckStatusState, conclusion: Types.CheckConclusionState | null, workflowRun: { event: string, url: string, workflow: { name: string }, file: { path: string } | null } | null } | null> | null } | null }
+      | { __typename: 'Commit', checkSuites: { totalCount: number, pageInfo: { hasNextPage: boolean, endCursor: string | null }, nodes: Array<{ status: Types.CheckStatusState, conclusion: Types.CheckConclusionState | null, workflowRun: { event: string, url: string, createdAt: string, updatedAt: string, workflow: { name: string }, file: { path: string } | null } | null } | null> | null } | null }
       | { __typename: 'Tag' }
       | { __typename: 'Tree' }
      | null } | null };
