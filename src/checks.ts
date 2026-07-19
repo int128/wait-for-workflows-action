@@ -20,6 +20,8 @@ type WorkflowRun = {
   url: string
   workflowName: string
   workflowFilePath: string | undefined
+  createdAt: Date
+  updatedAt: Date
 }
 
 export type RollupOptions = {
@@ -51,6 +53,8 @@ export const rollupChecks = (checks: ListChecksQuery, options: RollupOptions): R
       url: node.workflowRun.url,
       workflowName: node.workflowRun.workflow.name,
       workflowFilePath: node.workflowRun.file?.path,
+      createdAt: new Date(node.workflowRun.createdAt),
+      updatedAt: new Date(node.workflowRun.updatedAt),
     })
   }
 
@@ -133,7 +137,7 @@ export const filterLatestWorkflowRuns = (workflowRuns: WorkflowRun[]): WorkflowR
 const sortByWorkflowName = (workflowRuns: WorkflowRun[]) =>
   workflowRuns.sort((a, b) => a.workflowName.localeCompare(b.workflowName))
 
-const isFailedConclusion = (conclusion: CheckConclusionState | null): boolean =>
+export const isFailedConclusion = (conclusion: CheckConclusionState | null): boolean =>
   conclusion === CheckConclusionState.Failure ||
   conclusion === CheckConclusionState.Cancelled ||
   conclusion === CheckConclusionState.StartupFailure ||
@@ -175,9 +179,6 @@ export const formatStatus = (status: CheckStatusState): string => {
   }
   return status
 }
-
-export const filterFailedWorkflowRuns = (workflowRuns: WorkflowRun[]): WorkflowRun[] =>
-  workflowRuns.filter((run) => isFailedConclusion(run.conclusion))
 
 export const filterCompletedWorkflowRuns = (workflowRuns: WorkflowRun[]): WorkflowRun[] =>
   workflowRuns.filter((run) => run.status === CheckStatusState.Completed)

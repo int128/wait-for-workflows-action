@@ -2,15 +2,16 @@ import * as core from '@actions/core'
 import type { Octokit } from '@octokit/action'
 import {
   filterCompletedWorkflowRuns,
-  filterFailedWorkflowRuns,
   formatConclusion,
   formatStatus,
+  isFailedConclusion,
   type Rollup,
   rollupChecks,
 } from './checks.js'
 import { CheckConclusionState, CheckStatusState } from './generated/graphql-types.js'
 import type { Context } from './github.js'
 import { getListChecksQuery } from './queries/listChecks.js'
+import { writeWorkflowRunsSummary } from './summary.js'
 import { getWorkflowFilePathsForCurrentActivityType } from './workflows.js'
 
 // https://api.github.com/apps/github-actions
@@ -53,7 +54,9 @@ export const run = async (inputs: Inputs, octokit: Octokit, context: Context): P
   }
   return {
     rollupState: rollup.conclusion,
-    failedWorkflowNames: filterFailedWorkflowRuns(rollup.workflowRuns).map((run) => run.workflowName),
+    failedWorkflowNames: rollup.workflowRuns
+      .filter((run) => isFailedConclusion(run.conclusion))
+      .map((run) => run.workflowName),
   }
 }
 
@@ -109,26 +112,6 @@ const writeWorkflowRunsLog = (rollup: Rollup) => {
     ]
     core.info(columns.join(': '))
   }
-}
-
-const writeWorkflowRunsSummary = async (rollup: Rollup) => {
-  core.summary.addHeading('wait-for-workflows summary', 2)
-  core.summary.addRaw('<p>Rollup conclusion: ')
-  core.summary.addRaw(formatConclusion(rollup.conclusion))
-  core.summary.addRaw('</p>')
-  core.summary.addTable([
-    [
-      { data: 'Workflow run', header: true },
-      { data: 'Status', header: true },
-      { data: 'Conclusion', header: true },
-    ],
-    ...rollup.workflowRuns.map((run) => [
-      { data: `<a href="${run.url}">${run.workflowName} (${run.event})</a>` },
-      { data: formatStatus(run.status) },
-      { data: formatConclusion(run.conclusion) },
-    ]),
-  ])
-  await core.summary.write()
 }
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
