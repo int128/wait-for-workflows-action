@@ -2,7 +2,7 @@ import * as core from '@actions/core'
 import type { Octokit } from '@octokit/action'
 import {
   filterCompletedWorkflowRuns,
-  filterFailedWorkflowRuns,
+  isFailedConclusion,
   formatConclusion,
   formatStatus,
   type Rollup,
@@ -12,6 +12,7 @@ import { CheckConclusionState, CheckStatusState } from './generated/graphql-type
 import type { Context } from './github.js'
 import { getListChecksQuery } from './queries/listChecks.js'
 import { getWorkflowFilePathsForCurrentActivityType } from './workflows.js'
+import { writeWorkflowRunsSummary } from './summary.js'
 
 // https://api.github.com/apps/github-actions
 const GITHUB_ACTIONS_APP_ID = 15368
@@ -53,7 +54,9 @@ export const run = async (inputs: Inputs, octokit: Octokit, context: Context): P
   }
   return {
     rollupState: rollup.conclusion,
-    failedWorkflowNames: filterFailedWorkflowRuns(rollup.workflowRuns).map((run) => run.workflowName),
+    failedWorkflowNames: rollup.workflowRuns
+      .filter((run) => isFailedConclusion(run.conclusion))
+      .map((run) => run.workflowName),
   }
 }
 
@@ -109,37 +112,6 @@ const writeWorkflowRunsLog = (rollup: Rollup) => {
     ]
     core.info(columns.join(': '))
   }
-}
-
-const writeWorkflowRunsSummary = async (rollup: Rollup) => {
-  core.summary.addHeading('wait-for-workflows summary', 2)
-  core.summary.addRaw('<p>Rollup conclusion: ')
-  core.summary.addRaw(formatConclusion(rollup.conclusion))
-  core.summary.addRaw('</p>')
-  core.summary.addCodeBlock(getGanttTimeline(rollup), 'mermaid')
-  core.summary.addTable([
-    [
-      { data: 'Workflow run', header: true },
-      { data: 'Status', header: true },
-      { data: 'Conclusion', header: true },
-    ],
-    ...rollup.workflowRuns.map((run) => [
-      { data: `<a href="${run.url}">${run.workflowName} (${run.event})</a>` },
-      { data: formatStatus(run.status) },
-      { data: formatConclusion(run.conclusion) },
-    ]),
-  ])
-  await core.summary.write()
-}
-
-const getGanttTimeline = (rollup: Rollup): string => {
-  const lines = ['gantt', 'dateFormat YYYY-MM-DDTHH:mm:ssZ', 'axisFormat %H:%M:%S']
-  for (const run of rollup.workflowRuns) {
-    const start = run.createdAt.toISOString()
-    const seconds = (run.updatedAt.getTime() - run.createdAt.getTime()) / 1000
-    lines.push(`section ${run.workflowName}`, `${run.status} ${run.conclusion} :active, ${start}, ${seconds}s`)
-  }
-  return lines.join('\n')
 }
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))

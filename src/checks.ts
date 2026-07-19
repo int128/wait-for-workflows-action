@@ -137,7 +137,7 @@ export const filterLatestWorkflowRuns = (workflowRuns: WorkflowRun[]): WorkflowR
 const sortByWorkflowName = (workflowRuns: WorkflowRun[]) =>
   workflowRuns.sort((a, b) => a.workflowName.localeCompare(b.workflowName))
 
-const isFailedConclusion = (conclusion: CheckConclusionState | null): boolean =>
+export const isFailedConclusion = (conclusion: CheckConclusionState | null): boolean =>
   conclusion === CheckConclusionState.Failure ||
   conclusion === CheckConclusionState.Cancelled ||
   conclusion === CheckConclusionState.StartupFailure ||
@@ -179,9 +179,6 @@ export const formatStatus = (status: CheckStatusState): string => {
   }
   return status
 }
-
-export const filterFailedWorkflowRuns = (workflowRuns: WorkflowRun[]): WorkflowRun[] =>
-  workflowRuns.filter((run) => isFailedConclusion(run.conclusion))
 
 export const filterCompletedWorkflowRuns = (workflowRuns: WorkflowRun[]): WorkflowRun[] =>
   workflowRuns.filter((run) => run.status === CheckStatusState.Completed)
