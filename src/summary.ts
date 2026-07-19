@@ -8,23 +8,38 @@ export const writeWorkflowRunsSummary = async (rollup: Rollup) => {
   core.summary.addRaw('<p>Rollup conclusion: ')
   core.summary.addRaw(formatConclusion(rollup.conclusion))
   core.summary.addRaw('</p>')
-  core.summary.addCodeBlock(generateTimeline(rollup), 'mermaid')
+  writeTimeline(rollup)
+  writeTable(rollup)
+  await core.summary.write()
+}
+
+const writeTable = (rollup: Rollup) => {
   core.summary.addTable([
     [
       { data: 'Workflow run', header: true },
+      { data: 'Duration', header: true },
       { data: 'Status', header: true },
       { data: 'Conclusion', header: true },
     ],
     ...rollup.workflowRuns.map((run) => [
       { data: `<a href="${run.url}">${run.workflowName} (${run.event})</a>` },
+      { data: formatDuration((run.updatedAt.getTime() - run.createdAt.getTime()) / 1000) },
       { data: formatStatus(run.status) },
       { data: formatConclusion(run.conclusion) },
     ]),
   ])
-  await core.summary.write()
 }
 
-const generateTimeline = (rollup: Rollup): string => {
+const formatDuration = (seconds: number): string => {
+  const minutes = Math.floor(seconds / 60)
+  if (minutes === 0) {
+    return `${seconds}s`
+  }
+  const remainingSeconds = Math.floor(seconds % 60)
+  return `${minutes}m ${remainingSeconds}s`
+}
+
+const writeTimeline = (rollup: Rollup) => {
   const lines = ['gantt', 'dateFormat YYYY-MM-DDTHH:mm:ssZ', 'axisFormat %H:%M:%S']
   for (const run of rollup.workflowRuns) {
     const start = run.createdAt.toISOString()
@@ -40,5 +55,5 @@ const generateTimeline = (rollup: Rollup): string => {
       `${formatStatus(run.status)} ${formatConclusion(run.conclusion)} :${tag}, ${start}, ${seconds}s`,
     )
   }
-  return lines.join('\n')
+  core.summary.addCodeBlock(lines.join('\n'), 'mermaid')
 }
