@@ -136,8 +136,8 @@ const getGanttTimeline = (rollup: Rollup): string => {
   const lines = ['gantt', 'dateFormat YYYY-MM-DDTHH:mm:ssZ', 'axisFormat %H:%M:%S']
   for (const run of rollup.workflowRuns) {
     const start = run.createdAt.toISOString()
-    const end = run.updatedAt.toISOString()
-    lines.push(`section ${run.workflowName}`, `${run.status} ${run.conclusion} :active, ${start}, ${end}`)
+    const seconds = (run.updatedAt.getTime() - run.createdAt.getTime()) / 1000
+    lines.push(`section ${run.workflowName}`, `${run.status} ${run.conclusion} :active, ${start}, ${seconds}s`)
   }
   return lines.join('\n')
 }
