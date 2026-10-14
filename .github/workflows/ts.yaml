@@ -68,7 +68,7 @@ jobs:
         env:
           WAIT_FOR_WORKFLOWS_OUTCOME: ${{ steps.e2e-1.outcome }}
 
-      - uses: int128/rerun-workflows-action@ffe15d1b30f9a898817f3df110dc1d6a7a97646f # v1.17.0
+      - uses: int128/rerun-workflows-action@cc8ff032980fe32e2c8d84c600de1fa0deeef7e0 # v1.18.0
 
       - id: e2e-2
         name: Run int128/wait-for-workflows-action (#2)
