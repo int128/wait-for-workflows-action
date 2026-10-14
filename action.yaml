@@ -46,8 +46,8 @@ outputs:
     description: Either SUCCESS or FAILURE
   failed-workflow-names:
     description: List of the failed workflow names (multiline)
-  failure-annotation-messages:
-    description: List of the failure annotation messages (multiline)
+  failed-workflow-annotations:
+    description: List of the annotation messages of failed workflows (multiline)
 
 runs:
   using: 'node24'

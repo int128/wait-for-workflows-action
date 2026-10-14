@@ -59,7 +59,7 @@ jobs:
         uses: ./
         with:
           initial-delay-seconds: 0
-          period-seconds: 1
+          period-seconds: 3
           filter-workflow-names: |
             fixture
       - run: test "$WAIT_FOR_WORKFLOWS_OUTCOME" = "failure"

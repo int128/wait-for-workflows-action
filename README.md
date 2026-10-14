@@ -163,8 +163,8 @@ See [rate limiting](https://docs.github.com/en/rest/overview/resources-in-the-re
 
 ### Outputs
 
-| Name                          | Description                             |
-| ----------------------------- | --------------------------------------- |
-| `rollup-state`                | Either `SUCCESS` or `FAILURE`           |
-| `failed-workflow-names`       | List of the failed workflow names       |
-| `failure-annotation-messages` | List of the failure annotation messages |
+| Name                          | Description                                         |
+| ----------------------------- | --------------------------------------------------- |
+| `rollup-state`                | Either `SUCCESS` or `FAILURE`                       |
+| `failed-workflow-names`       | List of the failed workflow names                   |
+| `failed-workflow-annotations` | List of the annotation messages of failed workflows |

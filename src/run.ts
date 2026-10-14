@@ -37,7 +37,7 @@ type Inputs = {
 type Outputs = {
   rollupState: string | null
   failedWorkflowNames: string[]
-  failureAnnotationMessages: string[]
+  failedWorkflowAnnotations: string[]
 }
 
 export const run = async (inputs: Inputs, octokit: Octokit, context: Context): Promise<Outputs> => {
@@ -61,7 +61,7 @@ export const run = async (inputs: Inputs, octokit: Octokit, context: Context): P
   return {
     rollupState: rollup.conclusion,
     failedWorkflowNames: failedWorkflowRuns.map((run) => run.workflowName),
-    failureAnnotationMessages: annotatedWorkflowRuns.flatMap((workflowRun) => workflowRun.failureAnnotationMessages),
+    failedWorkflowAnnotations: annotatedWorkflowRuns.flatMap((workflowRun) => workflowRun.failureAnnotationMessages),
   }
 }
 
