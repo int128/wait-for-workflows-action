@@ -123,7 +123,8 @@ const fetchAnnotatedWorkflowRuns = async (failedWorkflowRuns: WorkflowRun[], oct
   if (failedWorkflowRuns.length === 0) {
     return []
   }
-  const workflowRunIds = failedWorkflowRuns.map((run) => run.id)
+  const FETCH_LIMIT = 100
+  const workflowRunIds = failedWorkflowRuns.slice(0, FETCH_LIMIT).map((run) => run.id)
   core.startGroup(`query workflowRunAnnotations`)
   const query = await executeWorkflowRunAnnotationsQuery(octokit, workflowRunIds)
   core.endGroup()
