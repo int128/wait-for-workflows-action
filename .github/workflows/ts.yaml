@@ -53,17 +53,23 @@ jobs:
       - run: pnpm i
       - run: pnpm build
 
-      - name: Run int128/wait-for-workflows-action (failure)
-        continue-on-error: true # This should fail by fixture workflow.
+      - id: e2e-1
+        name: Run int128/wait-for-workflows-action (#1)
+        continue-on-error: true
         uses: ./
         with:
           initial-delay-seconds: 0
           period-seconds: 1
           filter-workflow-names: |
             fixture
+      - run: test "$WAIT_FOR_WORKFLOWS_OUTCOME" = "failure"
+        env:
+          WAIT_FOR_WORKFLOWS_OUTCOME: ${{ steps.e2e-1.outcome }}
+
       - uses: int128/rerun-workflows-action@ffe15d1b30f9a898817f3df110dc1d6a7a97646f # v1.17.0
 
-      - name: Run int128/wait-for-workflows-action
+      - id: e2e-2
+        name: Run int128/wait-for-workflows-action (#2)
         uses: ./
         with:
           initial-delay-seconds: 0

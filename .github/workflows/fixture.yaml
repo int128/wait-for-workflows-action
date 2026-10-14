@@ -17,4 +17,4 @@ jobs:
     runs-on: ubuntu-slim
     timeout-minutes: 10
     steps:
-      - run: test ${{ github.run_attempt }} = 2
+      - run: test "$GITHUB_RUN_ATTEMPT" = 2
