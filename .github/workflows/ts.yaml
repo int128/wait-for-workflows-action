@@ -55,6 +55,8 @@ jobs:
           period-seconds: 3
           page-size-of-check-suites: 1
           filter-by-current-activity-type: true
+          exclude-workflow-names: |
+            wait-for-workflows
 
   generate:
     runs-on: ubuntu-latest
