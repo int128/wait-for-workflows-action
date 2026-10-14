@@ -11,6 +11,18 @@ on:
       - '*.config.*'
       - graphql-codegen.*
       - .github/workflows/ts.yaml
+  push:
+    # This must be same as ts.yaml
+    paths:
+      - src/**
+      - tests/**
+      - '*.json'
+      - '*.yaml'
+      - '*.config.*'
+      - graphql-codegen.*
+      - .github/workflows/ts.yaml
+    branches:
+      - main
 
 jobs:
   success-on-rerun:
