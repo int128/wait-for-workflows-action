@@ -1,10 +1,10 @@
 import assert from 'node:assert'
 import * as core from '@actions/core'
 import type { Octokit } from '@octokit/action'
-import type { ListChecksQuery, ListChecksQueryVariables } from '../generated/graphql.js'
+import type { WorkflowRunsForCommitQuery, WorkflowRunsForCommitQueryVariables } from '../generated/graphql.js'
 
 const query = /* GraphQL */ `
-  query listChecks(
+  query workflowRunsForCommit(
     $owner: String!
     $name: String!
     $oid: GitObjectID!
@@ -49,20 +49,10 @@ const query = /* GraphQL */ `
   }
 `
 
-type QueryFunction = (v: ListChecksQueryVariables) => Promise<ListChecksQuery>
-
-const createQueryFunction =
-  (octokit: Octokit): QueryFunction =>
-  async (v: ListChecksQueryVariables): Promise<ListChecksQuery> => {
-    core.info(`Calling ListChecksQuery(${JSON.stringify(v)})`)
-    const q: ListChecksQuery = await octokit.graphql(query, v)
-    assert(q.rateLimit != null, `rateLimit must not be null`)
-    core.info(`GitHub API rate limit is ${JSON.stringify(q.rateLimit)}`)
-    core.debug(JSON.stringify(q, undefined, 2))
-    return q
-  }
-
-export const getListChecksQuery = async (octokit: Octokit, v: ListChecksQueryVariables): Promise<ListChecksQuery> => {
+export const executeWorkflowRunsForCommitQuery = async (
+  octokit: Octokit,
+  v: WorkflowRunsForCommitQueryVariables,
+): Promise<WorkflowRunsForCommitQuery> => {
   const fn = createQueryFunction(octokit)
   const q = await fn(v)
   const checkSuites = getCheckSuites(q)
@@ -70,9 +60,22 @@ export const getListChecksQuery = async (octokit: Octokit, v: ListChecksQueryVar
   return q
 }
 
+type QueryFunction = (v: WorkflowRunsForCommitQueryVariables) => Promise<WorkflowRunsForCommitQuery>
+
+const createQueryFunction =
+  (octokit: Octokit): QueryFunction =>
+  async (v: WorkflowRunsForCommitQueryVariables): Promise<WorkflowRunsForCommitQuery> => {
+    core.info(`workflowRunsForCommitQuery(${JSON.stringify(v)})`)
+    const q: WorkflowRunsForCommitQuery = await octokit.graphql(query, v)
+    assert(q.rateLimit != null, `rateLimit must not be null`)
+    core.info(`rateLimit: ${JSON.stringify(q.rateLimit)}`)
+    core.debug(JSON.stringify(q, undefined, 2))
+    return q
+  }
+
 const paginateCheckSuites = async (
   fn: QueryFunction,
-  v: ListChecksQueryVariables,
+  v: WorkflowRunsForCommitQueryVariables,
   cumulativeCheckSuites: CheckSuites,
 ): Promise<void> => {
   assert(cumulativeCheckSuites.nodes != null, `cumulativeCheckSuites.nodes must not be null`)
@@ -92,7 +95,7 @@ const paginateCheckSuites = async (
 
 type CheckSuites = ReturnType<typeof getCheckSuites>
 
-const getCheckSuites = (q: ListChecksQuery) => {
+const getCheckSuites = (q: WorkflowRunsForCommitQuery) => {
   assert(q.repository != null, `repository must not be null`)
   assert(q.repository.object != null, `repository.object must not be null`)
   assert.strictEqual(q.repository.object.__typename, 'Commit')
