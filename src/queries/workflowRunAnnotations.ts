@@ -33,6 +33,7 @@ export type WorkflowRunAnnotationsQuery = {
 export const executeWorkflowRunAnnotationsQuery = async (octokit: Octokit, workflowRunIds: string[]) => {
   const idVarMap = new Map(workflowRunIds.map((workflowRunId, index) => [`v${index}`, workflowRunId]))
   const query = createQuery(idVarMap.keys().toArray())
-  core.info(query)
-  return await octokit.graphql<WorkflowRunAnnotationsQuery>(query, Object.fromEntries(idVarMap))
+  const variables = Object.fromEntries(idVarMap)
+  core.info(JSON.stringify(variables, null, 2))
+  return await octokit.graphql<WorkflowRunAnnotationsQuery>(query, variables)
 }
