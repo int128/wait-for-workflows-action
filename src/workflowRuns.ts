@@ -1,6 +1,6 @@
 import assert from 'node:assert'
 import { matchesGlob } from 'node:path'
-import type { ListChecksQuery } from './generated/graphql.js'
+import type { WorkflowRunsForCommitQuery } from './generated/graphql.js'
 import { CheckConclusionState, CheckStatusState } from './generated/graphql-types.js'
 
 export type Rollup = {
@@ -33,15 +33,15 @@ export type RollupOptions = {
   filterWorkflowFilePaths: string[]
 }
 
-export const rollupChecks = (checks: ListChecksQuery, options: RollupOptions): Rollup => {
-  assert(checks.repository != null, `repository must not be null`)
-  assert(checks.repository.object != null, `repository.object must not be null`)
-  assert.strictEqual(checks.repository.object.__typename, 'Commit')
-  assert(checks.repository.object.checkSuites != null, `repository.object.checkSuites must not be null`)
-  assert(checks.repository.object.checkSuites.nodes != null, `repository.object.checkSuites.nodes must not be null`)
+export const rollupWorkflowRuns = (query: WorkflowRunsForCommitQuery, options: RollupOptions): Rollup => {
+  assert(query.repository != null, `repository must not be null`)
+  assert(query.repository.object != null, `repository.object must not be null`)
+  assert.strictEqual(query.repository.object.__typename, 'Commit')
+  assert(query.repository.object.checkSuites != null, `repository.object.checkSuites must not be null`)
+  assert(query.repository.object.checkSuites.nodes != null, `repository.object.checkSuites.nodes must not be null`)
 
   const rawWorkflowRuns: WorkflowRun[] = []
-  for (const node of checks.repository.object.checkSuites.nodes) {
+  for (const node of query.repository.object.checkSuites.nodes) {
     assert(node != null, `checkSuite.node must not be null`)
     assert(node.conclusion !== undefined, `checkSuite.node.conclusion must not be undefined`)
     if (node.workflowRun == null) {

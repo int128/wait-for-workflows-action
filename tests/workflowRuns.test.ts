@@ -1,16 +1,16 @@
 import { describe, expect, it } from 'vitest'
+import type { WorkflowRunsForCommitQuery } from '../src/generated/graphql.js'
+import { CheckConclusionState, CheckStatusState } from '../src/generated/graphql-types.js'
 import {
   determineRollupConclusion,
   determineRollupStatus,
   filterLatestWorkflowRuns,
   type Rollup,
-  rollupChecks,
-} from '../src/checks.js'
-import type { ListChecksQuery } from '../src/generated/graphql.js'
-import { CheckConclusionState, CheckStatusState } from '../src/generated/graphql-types.js'
+  rollupWorkflowRuns,
+} from '../src/workflowRuns.js'
 
-describe('rollupChecks', () => {
-  const query: ListChecksQuery = {
+describe('rollupWorkflowRuns', () => {
+  const query: WorkflowRunsForCommitQuery = {
     rateLimit: {
       cost: 1,
       remaining: 5000,
@@ -80,7 +80,7 @@ describe('rollupChecks', () => {
     },
   }
   it('should exclude self workflow', () => {
-    const rollup = rollupChecks(query, {
+    const rollup = rollupWorkflowRuns(query, {
       selfWorkflowName: 'workflow-3',
       filterWorkflowEvents: [],
       excludeWorkflowNames: [],
@@ -117,7 +117,7 @@ describe('rollupChecks', () => {
     })
   })
   it('should filter given events', () => {
-    const rollup = rollupChecks(query, {
+    const rollup = rollupWorkflowRuns(query, {
       selfWorkflowName: 'workflow-3',
       filterWorkflowEvents: ['pull_request_target'],
       excludeWorkflowNames: [],
@@ -143,7 +143,7 @@ describe('rollupChecks', () => {
     })
   })
   it('should exclude workflows by a name', () => {
-    const rollup = rollupChecks(query, {
+    const rollup = rollupWorkflowRuns(query, {
       selfWorkflowName: 'workflow-3',
       filterWorkflowEvents: [],
       excludeWorkflowNames: ['*-1'],
@@ -169,7 +169,7 @@ describe('rollupChecks', () => {
     })
   })
   it('should filter workflows by a name', () => {
-    const rollup = rollupChecks(query, {
+    const rollup = rollupWorkflowRuns(query, {
       selfWorkflowName: 'workflow-3',
       filterWorkflowEvents: [],
       excludeWorkflowNames: [],
@@ -195,7 +195,7 @@ describe('rollupChecks', () => {
     })
   })
   it(`should return ${CheckConclusionState.Success} if no workflow`, () => {
-    const rollup = rollupChecks(query, {
+    const rollup = rollupWorkflowRuns(query, {
       selfWorkflowName: 'workflow-3',
       filterWorkflowEvents: [],
       excludeWorkflowNames: ['*'],

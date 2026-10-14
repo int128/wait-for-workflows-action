@@ -1,20 +1,20 @@
 import * as core from '@actions/core'
 import type { Octokit } from '@octokit/action'
 import { getFailureAnnotationMessages } from './annotations.js'
+import { CheckConclusionState, CheckStatusState } from './generated/graphql-types.js'
+import type { Context } from './github.js'
+import { executeWorkflowRunAnnotationsQuery } from './queries/workflowRunAnnotations.js'
+import { executeWorkflowRunsForCommitQuery } from './queries/workflowRunsForCommit.js'
+import { writeWorkflowRunsSummary } from './summary.js'
 import {
   filterCompletedWorkflowRuns,
   formatConclusion,
   formatStatus,
   isFailedConclusion,
   type Rollup,
-  rollupChecks,
+  rollupWorkflowRuns,
   type WorkflowRun,
-} from './checks.js'
-import { CheckConclusionState, CheckStatusState } from './generated/graphql-types.js'
-import type { Context } from './github.js'
-import { getListChecksQuery } from './queries/listChecks.js'
-import { executeWorkflowRunAnnotationsQuery } from './queries/workflowRunAnnotations.js'
-import { writeWorkflowRunsSummary } from './summary.js'
+} from './workflowRuns.js'
 import { getWorkflowFilePathsForCurrentActivityType } from './workflows.js'
 
 // https://api.github.com/apps/github-actions
@@ -73,8 +73,8 @@ const poll = async (inputs: Inputs, octokit: Octokit, context: Context): Promise
   core.info(`Waiting for initial delay ${inputs.initialDelaySeconds}s`)
   await sleep(inputs.initialDelaySeconds * 1000)
   for (;;) {
-    core.startGroup(`GraphQL request`)
-    const checks = await getListChecksQuery(octokit, {
+    core.startGroup(`query workflowRunsForCommit(${inputs.sha})`)
+    const workflowRunsForCommitQuery = await executeWorkflowRunsForCommitQuery(octokit, {
       owner: context.repo.owner,
       name: context.repo.repo,
       oid: inputs.sha,
@@ -83,7 +83,7 @@ const poll = async (inputs: Inputs, octokit: Octokit, context: Context): Promise
     })
     core.endGroup()
 
-    const rollup = rollupChecks(checks, {
+    const rollup = rollupWorkflowRuns(workflowRunsForCommitQuery, {
       selfWorkflowName: inputs.selfWorkflowName,
       filterWorkflowEvents: inputs.filterWorkflowEvents,
       excludeWorkflowNames: inputs.excludeWorkflowNames,
