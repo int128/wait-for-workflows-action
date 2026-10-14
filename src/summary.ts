@@ -1,7 +1,7 @@
 import * as core from '@actions/core'
-import type { Rollup } from './checks.js'
-import { formatConclusion, formatStatus, isFailedConclusion } from './checks.js'
 import { CheckConclusionState } from './generated/graphql-types.js'
+import type { Rollup } from './workflowRuns.js'
+import { formatConclusion, formatStatus, isFailedConclusion } from './workflowRuns.js'
 
 export const writeWorkflowRunsSummary = async (rollup: Rollup) => {
   core.summary.addHeading('wait-for-workflows summary', 2)
