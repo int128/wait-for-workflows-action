@@ -61,7 +61,9 @@ export const run = async (inputs: Inputs, octokit: Octokit, context: Context): P
   return {
     rollupState: rollup.conclusion,
     failedWorkflowNames: failedWorkflowRuns.map((run) => run.workflowName),
-    failedWorkflowAnnotations: annotatedWorkflowRuns.flatMap((workflowRun) => workflowRun.failureAnnotationMessages),
+    failedWorkflowAnnotations: [
+      ...new Set(annotatedWorkflowRuns.flatMap((workflowRun) => workflowRun.failureAnnotationMessages)),
+    ],
   }
 }
 
