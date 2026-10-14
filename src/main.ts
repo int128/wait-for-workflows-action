@@ -26,6 +26,7 @@ const main = async (): Promise<void> => {
     core.setOutput('rollup-state', outputs.rollupState)
   }
   core.setOutput('failed-workflow-names', outputs.failedWorkflowNames.join('\n'))
+  core.setOutput('failed-workflow-annotations', outputs.failedWorkflowAnnotations.join('\n'))
 
   core.startGroup('outputs')
   core.info(JSON.stringify(outputs, undefined, 2))

@@ -45,7 +45,9 @@ outputs:
   rollup-state:
     description: Either SUCCESS or FAILURE
   failed-workflow-names:
-    description: List of failed workflow names (multiline)
+    description: List of the failed workflow names (multiline)
+  failed-workflow-annotations:
+    description: List of the annotation messages of failed workflows (multiline)
 
 runs:
   using: 'node24'

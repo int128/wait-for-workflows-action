@@ -28,6 +28,7 @@ const query = /* GraphQL */ `
             }
             nodes {
               workflowRun {
+                id
                 event
                 url
                 createdAt

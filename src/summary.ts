@@ -1,31 +1,34 @@
 import * as core from '@actions/core'
+import type { AnnotatedWorkflowRun } from './annotations.js'
 import { CheckConclusionState } from './generated/graphql-types.js'
 import type { Rollup } from './workflowRuns.js'
 import { formatConclusion, formatStatus, isFailedConclusion } from './workflowRuns.js'
 
-export const writeWorkflowRunsSummary = async (rollup: Rollup) => {
+export const writeWorkflowRunsSummary = async (rollup: Rollup, annotatedWorkflowRuns: AnnotatedWorkflowRun[]) => {
   core.summary.addHeading('wait-for-workflows summary', 2)
   core.summary.addRaw('<p>Rollup conclusion: ')
   core.summary.addRaw(formatConclusion(rollup.conclusion))
   core.summary.addRaw('</p>')
   writeTimeline(rollup)
-  writeTable(rollup)
+  writeTable(rollup, annotatedWorkflowRuns)
   await core.summary.write()
 }
 
-const writeTable = (rollup: Rollup) => {
+const writeTable = (rollup: Rollup, annotatedWorkflowRuns: AnnotatedWorkflowRun[]) => {
   core.summary.addTable([
     [
       { data: 'Workflow run', header: true },
       { data: 'Duration', header: true },
       { data: 'Status', header: true },
       { data: 'Conclusion', header: true },
+      { data: 'Annotations', header: true },
     ],
     ...rollup.workflowRuns.map((run) => [
       { data: `<a href="${run.url}">${run.workflowName} (${run.event})</a>` },
       { data: formatDuration((run.updatedAt.getTime() - run.createdAt.getTime()) / 1000) },
       { data: formatStatus(run.status) },
       { data: formatConclusion(run.conclusion) },
+      { data: annotatedWorkflowRuns.find((a) => a.id === run.id)?.failureAnnotationMessages?.join('\n') ?? '' },
     ]),
   ])
 }

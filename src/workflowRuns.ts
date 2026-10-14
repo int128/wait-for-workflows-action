@@ -13,7 +13,8 @@ type RollupStatus = CheckStatusState.Completed | null
 
 type RollupConclusion = CheckConclusionState.Success | CheckConclusionState.Failure | null
 
-type WorkflowRun = {
+export type WorkflowRun = {
+  id: string
   status: CheckStatusState
   conclusion: CheckConclusionState | null
   event: string
@@ -47,6 +48,7 @@ export const rollupWorkflowRuns = (query: WorkflowRunsForCommitQuery, options: R
       continue
     }
     rawWorkflowRuns.push({
+      id: node.workflowRun.id,
       status: node.status,
       conclusion: node.conclusion,
       event: node.workflowRun.event,
