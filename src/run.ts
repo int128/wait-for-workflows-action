@@ -1,5 +1,6 @@
 import * as core from '@actions/core'
 import type { Octokit } from '@octokit/action'
+import { getFailureAnnotationMessages } from './annotations.js'
 import {
   filterCompletedWorkflowRuns,
   formatConclusion,
@@ -7,10 +8,12 @@ import {
   isFailedConclusion,
   type Rollup,
   rollupChecks,
+  type WorkflowRun,
 } from './checks.js'
 import { CheckConclusionState, CheckStatusState } from './generated/graphql-types.js'
 import type { Context } from './github.js'
 import { getListChecksQuery } from './queries/listChecks.js'
+import { executeWorkflowRunAnnotationsQuery } from './queries/workflowRunAnnotations.js'
 import { writeWorkflowRunsSummary } from './summary.js'
 import { getWorkflowFilePathsForCurrentActivityType } from './workflows.js'
 
@@ -34,6 +37,7 @@ type Inputs = {
 type Outputs = {
   rollupState: string | null
   failedWorkflowNames: string[]
+  failureAnnotationMessages: string[]
 }
 
 export const run = async (inputs: Inputs, octokit: Octokit, context: Context): Promise<Outputs> => {
@@ -52,11 +56,11 @@ export const run = async (inputs: Inputs, octokit: Octokit, context: Context): P
   if (rollup.conclusion === CheckConclusionState.Failure) {
     core.setFailed(`Some workflow has failed. For details, see ${inputs.selfWorkflowURL}`)
   }
+  const failedWorkflowRuns = rollup.workflowRuns.filter((run) => isFailedConclusion(run.conclusion))
   return {
     rollupState: rollup.conclusion,
-    failedWorkflowNames: rollup.workflowRuns
-      .filter((run) => isFailedConclusion(run.conclusion))
-      .map((run) => run.workflowName),
+    failedWorkflowNames: failedWorkflowRuns.map((run) => run.workflowName),
+    failureAnnotationMessages: await fetchFailureAnnotationMessages(failedWorkflowRuns, octokit),
   }
 }
 
@@ -112,6 +116,18 @@ const writeWorkflowRunsLog = (rollup: Rollup) => {
     ]
     core.info(columns.join(': '))
   }
+}
+
+const fetchFailureAnnotationMessages = async (failedWorkflowRuns: WorkflowRun[], octokit: Octokit) => {
+  const messages: string[] = []
+  const workflowRunIds = failedWorkflowRuns.map((run) => run.id)
+  for (const workflowRunId of workflowRunIds) {
+    core.startGroup(`workflowRunAnnotations(${workflowRunId})`)
+    const query = await executeWorkflowRunAnnotationsQuery(octokit, { workflowRunId })
+    core.endGroup()
+    messages.push(...getFailureAnnotationMessages(query))
+  }
+  return messages
 }
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))

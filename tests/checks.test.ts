@@ -27,6 +27,7 @@ describe('rollupChecks', () => {
           nodes: [
             {
               workflowRun: {
+                id: 'WR_1',
                 event: 'pull_request_target',
                 url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/1',
                 workflow: {
@@ -43,6 +44,7 @@ describe('rollupChecks', () => {
             },
             {
               workflowRun: {
+                id: 'WR_2',
                 event: 'pull_request',
                 url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/2',
                 workflow: {
@@ -59,6 +61,7 @@ describe('rollupChecks', () => {
             },
             {
               workflowRun: {
+                id: 'WR_3',
                 event: 'pull_request',
                 url: 'https://github.com/int128/wait-for-workflows-action/actions/runs/3',
                 workflow: {
@@ -89,6 +92,7 @@ describe('rollupChecks', () => {
       conclusion: CheckConclusionState.Success,
       workflowRuns: [
         {
+          id: 'WR_1',
           status: CheckStatusState.Completed,
           conclusion: CheckConclusionState.Skipped,
           event: 'pull_request_target',
@@ -99,6 +103,7 @@ describe('rollupChecks', () => {
           updatedAt: new Date('2024-06-01T00:01:00Z'),
         },
         {
+          id: 'WR_2',
           status: CheckStatusState.Completed,
           conclusion: CheckConclusionState.Success,
           event: 'pull_request',
@@ -124,6 +129,7 @@ describe('rollupChecks', () => {
       conclusion: CheckConclusionState.Success,
       workflowRuns: [
         {
+          id: 'WR_1',
           status: CheckStatusState.Completed,
           conclusion: CheckConclusionState.Skipped,
           event: 'pull_request_target',
@@ -149,6 +155,7 @@ describe('rollupChecks', () => {
       conclusion: CheckConclusionState.Success,
       workflowRuns: [
         {
+          id: 'WR_2',
           status: CheckStatusState.Completed,
           conclusion: CheckConclusionState.Success,
           event: 'pull_request',
@@ -174,6 +181,7 @@ describe('rollupChecks', () => {
       conclusion: CheckConclusionState.Success,
       workflowRuns: [
         {
+          id: 'WR_2',
           status: CheckStatusState.Completed,
           conclusion: CheckConclusionState.Success,
           event: 'pull_request',
@@ -206,6 +214,7 @@ describe('filterLatestWorkflowRuns', () => {
   it('returns the latest workflow runs by name and event', () => {
     const runs = [
       {
+        id: 'WR_1',
         status: CheckStatusState.Completed,
         conclusion: CheckConclusionState.Success,
         event: 'pull_request',
@@ -216,6 +225,7 @@ describe('filterLatestWorkflowRuns', () => {
         updatedAt: new Date('2024-06-01T00:01:00Z'),
       },
       {
+        id: 'WR_2',
         status: CheckStatusState.Completed,
         conclusion: CheckConclusionState.Skipped,
         event: 'pull_request',
@@ -229,6 +239,7 @@ describe('filterLatestWorkflowRuns', () => {
     const latestWorkflowRuns = filterLatestWorkflowRuns(runs)
     expect(latestWorkflowRuns).toStrictEqual([
       {
+        id: 'WR_2',
         status: CheckStatusState.Completed,
         conclusion: CheckConclusionState.Skipped,
         event: 'pull_request',
@@ -244,6 +255,7 @@ describe('filterLatestWorkflowRuns', () => {
 
 describe('determineRollup functions', () => {
   const runSuccess = {
+    id: 'WR_SUCCESS',
     status: CheckStatusState.Completed,
     conclusion: CheckConclusionState.Success,
     event: 'pull_request',
@@ -254,6 +266,7 @@ describe('determineRollup functions', () => {
     updatedAt: new Date('2024-06-01T00:01:00Z'),
   }
   const runFailure = {
+    id: 'WR_FAILURE',
     status: CheckStatusState.Completed,
     conclusion: CheckConclusionState.Failure,
     event: 'pull_request',
@@ -264,6 +277,7 @@ describe('determineRollup functions', () => {
     updatedAt: new Date('2024-06-01T00:01:00Z'),
   }
   const runInProgress = {
+    id: 'WR_IN_PROGRESS',
     status: CheckStatusState.InProgress,
     conclusion: null,
     event: 'pull_request',
@@ -274,6 +288,7 @@ describe('determineRollup functions', () => {
     updatedAt: new Date('2024-06-01T00:01:00Z'),
   }
   const runQueued = {
+    id: 'WR_QUEUED',
     status: CheckStatusState.Queued,
     conclusion: null,
     event: 'pull_request',
