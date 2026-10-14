@@ -2,9 +2,14 @@ import assert from 'node:assert'
 import { CheckAnnotationLevel } from './generated/graphql-types.js'
 import type { WorkflowRunAnnotationsQuery } from './queries/workflowRunAnnotations.js'
 
-export const getFailureAnnotationMessages = (query: WorkflowRunAnnotationsQuery) => {
-  const messages = []
-  for (const fragment of Object.values(query)) {
+export type AnnotatedWorkflowRun = {
+  id: string
+  failureAnnotationMessages: string[]
+}
+
+export const getAnnotatedWorkflowRuns = (query: WorkflowRunAnnotationsQuery): AnnotatedWorkflowRun[] =>
+  Object.values(query).map((fragment) => {
+    const failureAnnotationMessageSet = new Set<string>()
     assert(fragment.checkSuite.checkRuns != null, `checkSuite.checkRuns must not be null`)
     assert(fragment.checkSuite.checkRuns.nodes != null, `checkSuite.checkRuns.nodes must not be null`)
     for (const checkRunNode of fragment.checkSuite.checkRuns.nodes) {
@@ -14,10 +19,12 @@ export const getFailureAnnotationMessages = (query: WorkflowRunAnnotationsQuery)
       for (const annotationNode of checkRunNode.annotations.nodes) {
         assert(annotationNode != null, `annotationNode must not be null`)
         if (annotationNode.annotationLevel === CheckAnnotationLevel.Failure) {
-          messages.push(annotationNode.message)
+          failureAnnotationMessageSet.add(annotationNode.message)
         }
       }
     }
-  }
-  return messages
-}
+    return {
+      id: fragment.id,
+      failureAnnotationMessages: [...failureAnnotationMessageSet],
+    }
+  })

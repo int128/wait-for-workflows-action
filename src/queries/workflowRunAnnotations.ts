@@ -4,6 +4,7 @@ import type { WorkflowRunAnnotationsFragment } from '../generated/graphql.js'
 
 const fragment = /* GraphQL */ `
   fragment WorkflowRunAnnotations on WorkflowRun {
+    id
     checkSuite {
       checkRuns(first: 100) {
         nodes {
