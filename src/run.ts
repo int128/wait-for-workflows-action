@@ -119,15 +119,14 @@ const writeWorkflowRunsLog = (rollup: Rollup) => {
 }
 
 const fetchFailureAnnotationMessages = async (failedWorkflowRuns: WorkflowRun[], octokit: Octokit) => {
-  const messages: string[] = []
-  const workflowRunIds = failedWorkflowRuns.map((run) => run.id)
-  for (const workflowRunId of workflowRunIds) {
-    core.startGroup(`workflowRunAnnotations(${workflowRunId})`)
-    const query = await executeWorkflowRunAnnotationsQuery(octokit, { workflowRunId })
-    core.endGroup()
-    messages.push(...getFailureAnnotationMessages(query))
+  if (failedWorkflowRuns.length === 0) {
+    return []
   }
-  return messages
+  const workflowRunIds = failedWorkflowRuns.map((run) => run.id)
+  core.startGroup(`query workflowRunAnnotations`)
+  const query = await executeWorkflowRunAnnotationsQuery(octokit, workflowRunIds)
+  core.endGroup()
+  return getFailureAnnotationMessages(query)
 }
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))

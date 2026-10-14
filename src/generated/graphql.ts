@@ -49,15 +49,7 @@ export type CheckStatusState =
   /** The check suite or run is in waiting state. */
   | 'WAITING';
 
-export type WorkflowRunAnnotationsQueryVariables = Exact<{
-  workflowRunId: string | number;
-}>;
-
-
-export type WorkflowRunAnnotationsQuery = { node:
-    | { checkSuite: { checkRuns: { nodes: Array<{ annotations: { nodes: Array<{ annotationLevel: Types.CheckAnnotationLevel | null, message: string } | null> | null } | null } | null> | null } | null } }
-    | Record<PropertyKey, never>
-   | null };
+export type WorkflowRunAnnotationsFragment = { checkSuite: { checkRuns: { nodes: Array<{ annotations: { nodes: Array<{ annotationLevel: Types.CheckAnnotationLevel | null, message: string } | null> | null } | null } | null> | null } | null } };
 
 export type WorkflowRunsForCommitQueryVariables = Exact<{
   owner: string;

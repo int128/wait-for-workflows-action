@@ -1,21 +1,16 @@
+import * as core from '@actions/core'
 import type { Octokit } from '@octokit/action'
-import type { WorkflowRunAnnotationsQuery, WorkflowRunAnnotationsQueryVariables } from '../generated/graphql.js'
+import type { WorkflowRunAnnotationsFragment } from '../generated/graphql.js'
 
-const query = /* GraphQL */ `
-  query workflowRunAnnotations(
-    $workflowRunId: ID!
-  ) {
-    node(id: $workflowRunId) {
-      ... on WorkflowRun {
-        checkSuite {
-          checkRuns(first: 100) {
+const fragment = /* GraphQL */ `
+  fragment WorkflowRunAnnotations on WorkflowRun {
+    checkSuite {
+      checkRuns(first: 100) {
+        nodes {
+          annotations(first: 10) {
             nodes {
-              annotations(first: 10) {
-                nodes {
-                  annotationLevel
-                  message
-                }
-              }
+              annotationLevel
+              message
             }
           }
         }
@@ -24,5 +19,20 @@ const query = /* GraphQL */ `
   }
 `
 
-export const executeWorkflowRunAnnotationsQuery = async (octokit: Octokit, v: WorkflowRunAnnotationsQueryVariables) =>
-  await octokit.graphql<WorkflowRunAnnotationsQuery>(query, v)
+const createQuery = (idVars: string[]) => `
+  query workflowRunAnnotations(${idVars.map((v) => `$${v}: ID!`).join(', ')}) {
+    ${idVars.map((v) => `${v}: node(id: $${v}) { ...WorkflowRunAnnotations }`).join('\n')}
+  }
+  ${fragment}
+`
+
+export type WorkflowRunAnnotationsQuery = {
+  [vIndex: string]: WorkflowRunAnnotationsFragment
+}
+
+export const executeWorkflowRunAnnotationsQuery = async (octokit: Octokit, workflowRunIds: string[]) => {
+  const idVarMap = new Map(workflowRunIds.map((workflowRunId, index) => [`v${index}`, workflowRunId]))
+  const query = createQuery(idVarMap.keys().toArray())
+  core.info(query)
+  return await octokit.graphql<WorkflowRunAnnotationsQuery>(query, Object.fromEntries(idVarMap))
+}
