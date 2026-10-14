@@ -48,6 +48,17 @@ jobs:
       - run: corepack enable
       - run: pnpm i
       - run: pnpm build
+
+      - name: Run int128/wait-for-workflows-action (failure)
+        continue-on-error: true # This should fail by fixture workflow.
+        uses: ./
+        with:
+          initial-delay-seconds: 0
+          period-seconds: 1
+          filter-workflow-names: |
+            fixture
+      - uses: int128/rerun-workflows-action@ffe15d1b30f9a898817f3df110dc1d6a7a97646f # v1.17.0
+
       - name: Run int128/wait-for-workflows-action
         uses: ./
         with:
