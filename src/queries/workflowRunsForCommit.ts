@@ -49,19 +49,6 @@ const query = /* GraphQL */ `
   }
 `
 
-type QueryFunction = (v: WorkflowRunsForCommitQueryVariables) => Promise<WorkflowRunsForCommitQuery>
-
-const createQueryFunction =
-  (octokit: Octokit): QueryFunction =>
-  async (v: WorkflowRunsForCommitQueryVariables): Promise<WorkflowRunsForCommitQuery> => {
-    core.info(`Calling WorkflowRunsForCommitQuery(${JSON.stringify(v)})`)
-    const q: WorkflowRunsForCommitQuery = await octokit.graphql(query, v)
-    assert(q.rateLimit != null, `rateLimit must not be null`)
-    core.info(`GitHub API rate limit is ${JSON.stringify(q.rateLimit)}`)
-    core.debug(JSON.stringify(q, undefined, 2))
-    return q
-  }
-
 export const executeWorkflowRunsForCommitQuery = async (
   octokit: Octokit,
   v: WorkflowRunsForCommitQueryVariables,
@@ -72,6 +59,19 @@ export const executeWorkflowRunsForCommitQuery = async (
   await paginateCheckSuites(fn, v, checkSuites)
   return q
 }
+
+type QueryFunction = (v: WorkflowRunsForCommitQueryVariables) => Promise<WorkflowRunsForCommitQuery>
+
+const createQueryFunction =
+  (octokit: Octokit): QueryFunction =>
+  async (v: WorkflowRunsForCommitQueryVariables): Promise<WorkflowRunsForCommitQuery> => {
+    core.info(`workflowRunsForCommitQuery(${JSON.stringify(v)})`)
+    const q: WorkflowRunsForCommitQuery = await octokit.graphql(query, v)
+    assert(q.rateLimit != null, `rateLimit must not be null`)
+    core.info(`rateLimit: ${JSON.stringify(q.rateLimit)}`)
+    core.debug(JSON.stringify(q, undefined, 2))
+    return q
+  }
 
 const paginateCheckSuites = async (
   fn: QueryFunction,
