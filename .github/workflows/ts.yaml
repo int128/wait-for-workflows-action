@@ -39,6 +39,10 @@ jobs:
   e2e-test:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
+      checks: read
+      actions: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -48,7 +52,24 @@ jobs:
       - run: corepack enable
       - run: pnpm i
       - run: pnpm build
-      - name: Run int128/wait-for-workflows-action
+
+      - id: e2e-1
+        name: Run int128/wait-for-workflows-action (#1)
+        continue-on-error: true
+        uses: ./
+        with:
+          initial-delay-seconds: 0
+          period-seconds: 1
+          filter-workflow-names: |
+            fixture
+      - run: test "$WAIT_FOR_WORKFLOWS_OUTCOME" = "failure"
+        env:
+          WAIT_FOR_WORKFLOWS_OUTCOME: ${{ steps.e2e-1.outcome }}
+
+      - uses: int128/rerun-workflows-action@ffe15d1b30f9a898817f3df110dc1d6a7a97646f # v1.17.0
+
+      - id: e2e-2
+        name: Run int128/wait-for-workflows-action (#2)
         uses: ./
         with:
           initial-delay-seconds: 0
