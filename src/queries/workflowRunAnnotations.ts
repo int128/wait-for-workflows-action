@@ -6,7 +6,9 @@ const fragment = /* GraphQL */ `
   fragment WorkflowRunAnnotations on WorkflowRun {
     id
     checkSuite {
-      checkRuns(first: 100) {
+      checkRuns(first: 100, filterBy: {
+        conclusions: [FAILURE]
+      }) {
         nodes {
           annotations(first: 10) {
             nodes {
