@@ -15,23 +15,23 @@ inputs:
   filter-by-current-activity-type:
     description: Filter workflow runs by the activity type of the current event
     required: true
-    default: 'false'
+    default: "false"
   fail-fast:
     description: Exit immediately if any workflow is failing
     required: true
-    default: 'true'
+    default: "true"
   initial-delay-seconds:
     description: Initial delay before polling in seconds
     required: true
-    default: '10'
+    default: "10"
   period-seconds:
     description: Polling period in seconds
     required: true
-    default: '15'
+    default: "15"
   page-size-of-check-suites:
     description: Page size of CheckSuites query
     required: true
-    default: '100'
+    default: "100"
   sha:
     description: Commit SHA to wait for
     required: true
@@ -50,5 +50,5 @@ outputs:
     description: List of the annotation messages of failed workflows (multiline)
 
 runs:
-  using: 'node24'
-  main: 'dist/index.js'
+  using: "node24"
+  main: "dist/index.js"
